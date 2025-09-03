@@ -10,6 +10,9 @@ data class Song(
     val title: String,
     val artist: String,
     val album: String,
+    val genre: String = "",
+    val track: Int = 0,
+    val year: Int = 0,
     val duration: Long, // Duration in milliseconds
     val uri: Uri,
     val albumArt: Uri? = null,
@@ -46,5 +49,26 @@ data class Song(
      */
     fun getDisplayAlbum(): String {
         return if (album.isNotBlank()) album else "Unknown Album"
+    }
+    
+    /**
+     * Get display genre name
+     */
+    fun getDisplayGenre(): String {
+        return if (genre.isNotBlank()) genre else "Unknown Genre"
+    }
+    
+    /**
+     * Get formatted year
+     */
+    fun getDisplayYear(): String {
+        return if (year > 0) year.toString() else "Unknown Year"
+    }
+    
+    /**
+     * Get formatted track number
+     */
+    fun getDisplayTrack(): String {
+        return if (track > 0) track.toString() else ""
     }
 }

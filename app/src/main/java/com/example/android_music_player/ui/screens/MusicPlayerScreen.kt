@@ -2,12 +2,12 @@ package com.example.android_music_player.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LibraryMusic
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.android_music_player.data.BrowseCategory
 import com.example.android_music_player.data.PlaybackState
 import com.example.android_music_player.ui.components.PlayerControls
 import com.example.android_music_player.ui.components.SongListItem
@@ -26,6 +27,8 @@ import com.example.android_music_player.viewmodel.MusicPlayerViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MusicPlayerScreen(
+    onBrowseCategory: (BrowseCategory) -> Unit = {},
+    onViewPlaylists: () -> Unit = {},
     viewModel: MusicPlayerViewModel = viewModel()
 ) {
     val songs by viewModel.songs.collectAsState()
@@ -51,6 +54,9 @@ fun MusicPlayerScreen(
                 IconButton(onClick = { isSearchExpanded = !isSearchExpanded }) {
                     Icon(Icons.Default.Search, contentDescription = "Search")
                 }
+                IconButton(onClick = onViewPlaylists) {
+                    Icon(Icons.Default.QueueMusic, contentDescription = "Playlists")
+                }
                 IconButton(onClick = { viewModel.refreshSongs() }) {
                     Icon(Icons.Default.Refresh, contentDescription = "Refresh")
                 }
@@ -74,6 +80,87 @@ fun MusicPlayerScreen(
                     .fillMaxWidth()
                     .padding(16.dp)
             )
+        }
+        
+        // Category chips for quick access
+        if (!isSearchExpanded) {
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                item {
+                    FilterChip(
+                        onClick = { onBrowseCategory(BrowseCategory.ARTISTS) },
+                        label = { Text("Artists") },
+                        selected = false,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    )
+                }
+                item {
+                    FilterChip(
+                        onClick = { onBrowseCategory(BrowseCategory.ALBUMS) },
+                        label = { Text("Albums") },
+                        selected = false,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Album,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    )
+                }
+                item {
+                    FilterChip(
+                        onClick = { onBrowseCategory(BrowseCategory.GENRES) },
+                        label = { Text("Genres") },
+                        selected = false,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Category,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    )
+                }
+                item {
+                    FilterChip(
+                        onClick = { onBrowseCategory(BrowseCategory.FAVORITES) },
+                        label = { Text("Favorites") },
+                        selected = false,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Favorite,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    )
+                }
+                item {
+                    FilterChip(
+                        onClick = { onBrowseCategory(BrowseCategory.RECENTLY_PLAYED) },
+                        label = { Text("Recent") },
+                        selected = false,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.History,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
         }
         
         if (showPlayerControls) {
@@ -180,7 +267,11 @@ fun MusicPlayerScreen(
                                     showPlayerControls = true
                                 },
                                 isCurrentlyPlaying = playerState.currentSong?.id == song.id && 
-                                    playerState.playbackState == PlaybackState.PLAYING
+                                    playerState.playbackState == PlaybackState.PLAYING,
+                                isFavorite = viewModel.isFavorite(song.id),
+                                onFavoriteClick = { clickedSong ->
+                                    viewModel.toggleFavorite(clickedSong.id)
+                                }
                             )
                         }
                     }

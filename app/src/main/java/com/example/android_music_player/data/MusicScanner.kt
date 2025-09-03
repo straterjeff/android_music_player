@@ -32,7 +32,10 @@ class MusicScanner(private val context: Context) {
             MediaStore.Audio.Media.DATE_ADDED,
             MediaStore.Audio.Media.SIZE,
             MediaStore.Audio.Media.MIME_TYPE,
-            MediaStore.Audio.Media.ALBUM_ID
+            MediaStore.Audio.Media.ALBUM_ID,
+            MediaStore.Audio.Media.TRACK,
+            MediaStore.Audio.Media.YEAR,
+            "genre" // MediaStore.Audio.Genres.NAME - using string as it's not always available
         )
         
         val selection = "${MediaStore.Audio.Media.IS_MUSIC} = 1"
@@ -57,6 +60,9 @@ class MusicScanner(private val context: Context) {
             val sizeColumn = cur.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)
             val mimeTypeColumn = cur.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE)
             val albumIdColumn = cur.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
+            val trackColumn = cur.getColumnIndexOrThrow(MediaStore.Audio.Media.TRACK)
+            val yearColumn = cur.getColumnIndexOrThrow(MediaStore.Audio.Media.YEAR)
+            val genreColumn = cur.getColumnIndex("genre") // May not exist on all devices
             
             while (cur.moveToNext()) {
                 val id = cur.getLong(idColumn)
@@ -69,6 +75,9 @@ class MusicScanner(private val context: Context) {
                 val size = cur.getLong(sizeColumn)
                 val mimeType = cur.getString(mimeTypeColumn) ?: ""
                 val albumId = cur.getLong(albumIdColumn)
+                val track = cur.getInt(trackColumn)
+                val year = cur.getInt(yearColumn)
+                val genre = if (genreColumn >= 0) cur.getString(genreColumn) ?: "" else ""
                 
                 // Create content URI for the audio file
                 val contentUri = ContentUris.withAppendedId(
@@ -87,6 +96,9 @@ class MusicScanner(private val context: Context) {
                     title = title,
                     artist = artist,
                     album = album,
+                    genre = genre,
+                    track = track,
+                    year = year,
                     duration = duration,
                     uri = contentUri,
                     albumArt = albumArtUri,
@@ -117,13 +129,115 @@ class MusicScanner(private val context: Context) {
     }
     
     /**
-     * Search songs by title
+     * Get songs by genre
+     */
+    suspend fun getSongsByGenre(genre: String): List<Song> = withContext(Dispatchers.IO) {
+        scanForAudioFiles().filter { it.genre.equals(genre, ignoreCase = true) }
+    }
+    
+    /**
+     * Search songs by title, artist, album, or genre
      */
     suspend fun searchSongs(query: String): List<Song> = withContext(Dispatchers.IO) {
         scanForAudioFiles().filter { 
             it.title.contains(query, ignoreCase = true) ||
             it.artist.contains(query, ignoreCase = true) ||
-            it.album.contains(query, ignoreCase = true)
+            it.album.contains(query, ignoreCase = true) ||
+            it.genre.contains(query, ignoreCase = true)
         }
+    }
+    
+    /**
+     * Get all unique artists
+     */
+    suspend fun getAllArtists(): List<CategoryItem> = withContext(Dispatchers.IO) {
+        scanForAudioFiles()
+            .groupBy { it.artist }
+            .map { (artist, songs) ->
+                CategoryItem(
+                    id = artist,
+                    name = if (artist.isBlank()) "Unknown Artist" else artist,
+                    songCount = songs.size,
+                    category = BrowseCategory.ARTISTS,
+                    description = songs.firstOrNull()?.album ?: "",
+                    imageUri = songs.firstOrNull()?.albumArt?.toString()
+                )
+            }
+            .sortedBy { it.name }
+    }
+    
+    /**
+     * Get all unique albums
+     */
+    suspend fun getAllAlbums(): List<CategoryItem> = withContext(Dispatchers.IO) {
+        scanForAudioFiles()
+            .groupBy { "${it.artist}|${it.album}" } // Group by artist+album to avoid duplicates
+            .map { (key, songs) ->
+                val album = songs.first()
+                CategoryItem(
+                    id = key,
+                    name = if (album.album.isBlank()) "Unknown Album" else album.album,
+                    songCount = songs.size,
+                    category = BrowseCategory.ALBUMS,
+                    description = album.artist,
+                    imageUri = album.albumArt?.toString()
+                )
+            }
+            .sortedBy { it.name }
+    }
+    
+    /**
+     * Get all unique genres
+     */
+    suspend fun getAllGenres(): List<CategoryItem> = withContext(Dispatchers.IO) {
+        scanForAudioFiles()
+            .groupBy { it.genre }
+            .filter { it.key.isNotBlank() } // Filter out empty genres
+            .map { (genre, songs) ->
+                CategoryItem(
+                    id = genre,
+                    name = genre,
+                    songCount = songs.size,
+                    category = BrowseCategory.GENRES,
+                    description = "${songs.map { it.artist }.distinct().size} artists"
+                )
+            }
+            .sortedBy { it.name }
+    }
+    
+    /**
+     * Get recently added songs (last 30 days)
+     */
+    suspend fun getRecentlyAddedSongs(): List<Song> = withContext(Dispatchers.IO) {
+        val thirtyDaysAgo = System.currentTimeMillis() / 1000 - (30 * 24 * 60 * 60)
+        scanForAudioFiles()
+            .filter { it.dateAdded > thirtyDaysAgo }
+            .sortedByDescending { it.dateAdded }
+    }
+    
+    /**
+     * Get songs by year
+     */
+    suspend fun getSongsByYear(year: Int): List<Song> = withContext(Dispatchers.IO) {
+        scanForAudioFiles().filter { it.year == year }
+    }
+    
+    /**
+     * Get all unique years
+     */
+    suspend fun getAllYears(): List<CategoryItem> = withContext(Dispatchers.IO) {
+        scanForAudioFiles()
+            .filter { it.year > 0 }
+            .groupBy { it.year }
+            .map { (year, songs) ->
+                CategoryItem(
+                    id = year.toString(),
+                    name = year.toString(),
+                    songCount = songs.size,
+                    category = BrowseCategory.ALL_SONGS, // Using ALL_SONGS for year category
+                    description = "${songs.map { it.artist }.distinct().size} artists"
+                )
+            }
+            .sortedByDescending { it.name.toIntOrNull() ?: 0 }
     }
 }

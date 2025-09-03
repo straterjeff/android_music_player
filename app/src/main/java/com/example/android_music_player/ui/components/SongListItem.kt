@@ -4,6 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -29,7 +31,9 @@ fun SongListItem(
     song: Song,
     onSongClick: (Song) -> Unit,
     modifier: Modifier = Modifier,
-    isCurrentlyPlaying: Boolean = false
+    isCurrentlyPlaying: Boolean = false,
+    isFavorite: Boolean = false,
+    onFavoriteClick: ((Song) -> Unit)? = null
 ) {
     Card(
         modifier = modifier
@@ -120,12 +124,31 @@ fun SongListItem(
                 }
             }
             
-            // Duration
-            Text(
-                text = song.getFormattedDuration(),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            // Duration and favorite button
+            Column(
+                horizontalAlignment = Alignment.End
+            ) {
+                Text(
+                    text = song.getFormattedDuration(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                
+                // Favorite button
+                if (onFavoriteClick != null) {
+                    IconButton(
+                        onClick = { onFavoriteClick(song) },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+                            modifier = Modifier.size(16.dp),
+                            tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
         }
     }
 }

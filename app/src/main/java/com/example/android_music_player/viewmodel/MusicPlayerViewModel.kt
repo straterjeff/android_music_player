@@ -7,9 +7,13 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import com.example.android_music_player.data.BrowseCategory
+import com.example.android_music_player.data.CategoryItem
 import com.example.android_music_player.data.MusicScanner
 import com.example.android_music_player.data.PlayerState
 import com.example.android_music_player.data.PlaybackState
+import com.example.android_music_player.data.Playlist
+import com.example.android_music_player.data.PlaylistManager
 import com.example.android_music_player.data.Song
 import com.example.android_music_player.service.MusicService
 import com.google.common.util.concurrent.ListenableFuture
@@ -27,6 +31,7 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
     
     private val context = getApplication<Application>()
     private val musicScanner = MusicScanner(context)
+    private val playlistManager = PlaylistManager(context)
     
     private var mediaController: MediaController? = null
     private var controllerFuture: ListenableFuture<MediaController>? = null
@@ -46,6 +51,21 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
     
     private val _currentSongIndex = MutableStateFlow(0)
     val currentSongIndex: StateFlow<Int> = _currentSongIndex.asStateFlow()
+    
+    private val _playlists = MutableStateFlow<List<Playlist>>(emptyList())
+    val playlists: StateFlow<List<Playlist>> = _playlists.asStateFlow()
+    
+    private val _categories = MutableStateFlow<Map<BrowseCategory, List<CategoryItem>>>(emptyMap())
+    val categories: StateFlow<Map<BrowseCategory, List<CategoryItem>>> = _categories.asStateFlow()
+    
+    private val _currentCategory = MutableStateFlow(BrowseCategory.ALL_SONGS)
+    val currentCategory: StateFlow<BrowseCategory> = _currentCategory.asStateFlow()
+    
+    private val _favorites = MutableStateFlow<List<Long>>(emptyList())
+    val favorites: StateFlow<List<Long>> = _favorites.asStateFlow()
+    
+    private val _recentlyPlayed = MutableStateFlow<List<Song>>(emptyList())
+    val recentlyPlayed: StateFlow<List<Song>> = _recentlyPlayed.asStateFlow()
     
     // Player listener for state changes
     private val playerListener = object : Player.Listener {
@@ -69,6 +89,8 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
         initializeMediaController()
         startPositionUpdates()
         loadSongs()
+        loadCategories()
+        loadPlaylists()
     }
     
     private fun initializeMediaController() {
@@ -86,11 +108,62 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
             try {
                 val scannedSongs = musicScanner.scanForAudioFiles()
                 _songs.value = scannedSongs
+                loadRecentlyPlayed() // Load recently played songs after songs are loaded
             } catch (e: Exception) {
                 // Handle error
                 e.printStackTrace()
             } finally {
                 _isLoading.value = false
+            }
+        }
+    }
+    
+    private fun loadCategories() {
+        viewModelScope.launch {
+            try {
+                val artists = musicScanner.getAllArtists()
+                val albums = musicScanner.getAllAlbums()
+                val genres = musicScanner.getAllGenres()
+                val years = musicScanner.getAllYears()
+                
+                _categories.value = mapOf(
+                    BrowseCategory.ARTISTS to artists,
+                    BrowseCategory.ALBUMS to albums,
+                    BrowseCategory.GENRES to genres,
+                    BrowseCategory.ALL_SONGS to years // Using for years temporarily
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+    
+    private fun loadPlaylists() {
+        viewModelScope.launch {
+            try {
+                val allPlaylists = playlistManager.getAllPlaylists()
+                _playlists.value = allPlaylists
+                
+                // Load favorites
+                val favoritesPlaylist = allPlaylists.find { it.id == "favorites_playlist" }
+                _favorites.value = favoritesPlaylist?.songIds ?: emptyList()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+    
+    private fun loadRecentlyPlayed() {
+        viewModelScope.launch {
+            try {
+                val recentlyPlayedIds = playlistManager.getRecentlyPlayedSongIds()
+                val allSongs = _songs.value
+                val recentSongs = recentlyPlayedIds.mapNotNull { id ->
+                    allSongs.find { it.id == id }
+                }
+                _recentlyPlayed.value = recentSongs
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
@@ -141,6 +214,12 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
         _currentPlaylist.value = listOf(song)
         _currentSongIndex.value = 0
         updatePlayerState(PlaybackState.PLAYING, song)
+        
+        // Track recently played
+        viewModelScope.launch {
+            playlistManager.addToRecentlyPlayed(song.id)
+            loadRecentlyPlayed()
+        }
     }
     
     /**
@@ -162,6 +241,12 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
             _currentPlaylist.value = playlist
             _currentSongIndex.value = startIndex
             updatePlayerState(PlaybackState.PLAYING, playlist[startIndex])
+            
+            // Track recently played
+            viewModelScope.launch {
+                playlistManager.addToRecentlyPlayed(playlist[startIndex].id)
+                loadRecentlyPlayed()
+            }
         }
     }
     
@@ -268,6 +353,152 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
      */
     fun refreshSongs() {
         loadSongs()
+        loadCategories()
+    }
+    
+    // === Playlist Management Functions ===
+    
+    /**
+     * Create a new playlist
+     */
+    fun createPlaylist(name: String, description: String = "") {
+        viewModelScope.launch {
+            try {
+                playlistManager.createPlaylist(name, description)
+                loadPlaylists()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+    
+    /**
+     * Delete a playlist
+     */
+    fun deletePlaylist(playlistId: String) {
+        viewModelScope.launch {
+            try {
+                playlistManager.deletePlaylist(playlistId)
+                loadPlaylists()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+    
+    /**
+     * Add song to playlist
+     */
+    fun addSongToPlaylist(playlistId: String, songId: Long) {
+        viewModelScope.launch {
+            try {
+                playlistManager.addSongToPlaylist(playlistId, songId)
+                loadPlaylists()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+    
+    /**
+     * Remove song from playlist
+     */
+    fun removeSongFromPlaylist(playlistId: String, songId: Long) {
+        viewModelScope.launch {
+            try {
+                playlistManager.removeSongFromPlaylist(playlistId, songId)
+                loadPlaylists()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+    
+    /**
+     * Add/remove song to/from favorites
+     */
+    fun toggleFavorite(songId: Long) {
+        viewModelScope.launch {
+            try {
+                val isFav = playlistManager.isFavorite(songId)
+                if (isFav) {
+                    playlistManager.removeFromFavorites(songId)
+                } else {
+                    playlistManager.addToFavorites(songId)
+                }
+                loadPlaylists()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+    
+    /**
+     * Check if song is favorite
+     */
+    fun isFavorite(songId: Long): Boolean {
+        return _favorites.value.contains(songId)
+    }
+    
+    /**
+     * Get songs for a specific playlist
+     */
+    fun getPlaylistSongs(playlistId: String): List<Song> {
+        val playlist = _playlists.value.find { it.id == playlistId } ?: return emptyList()
+        val allSongs = _songs.value
+        return playlist.songIds.mapNotNull { id ->
+            allSongs.find { it.id == id }
+        }
+    }
+    
+    // === Category Browsing Functions ===
+    
+    /**
+     * Set current browsing category
+     */
+    fun setBrowseCategory(category: BrowseCategory) {
+        _currentCategory.value = category
+    }
+    
+    /**
+     * Get songs for a specific category item (artist, album, genre, etc.)
+     */
+    fun getCategorySongs(category: BrowseCategory, itemId: String): List<Song> {
+        return when (category) {
+            BrowseCategory.ARTISTS -> {
+                _songs.value.filter { it.artist.equals(itemId, ignoreCase = true) }
+            }
+            BrowseCategory.ALBUMS -> {
+                val parts = itemId.split("|")
+                if (parts.size == 2) {
+                    val (artist, album) = parts
+                    _songs.value.filter { 
+                        it.artist.equals(artist, ignoreCase = true) && 
+                        it.album.equals(album, ignoreCase = true) 
+                    }
+                } else {
+                    emptyList()
+                }
+            }
+            BrowseCategory.GENRES -> {
+                _songs.value.filter { it.genre.equals(itemId, ignoreCase = true) }
+            }
+            BrowseCategory.RECENTLY_ADDED -> {
+                _recentlyPlayed.value
+            }
+            BrowseCategory.FAVORITES -> {
+                val favoriteIds = _favorites.value
+                _songs.value.filter { favoriteIds.contains(it.id) }
+            }
+            else -> _songs.value
+        }
+    }
+    
+    /**
+     * Filter songs by year
+     */
+    fun getSongsByYear(year: Int): List<Song> {
+        return _songs.value.filter { it.year == year }
     }
     
     private fun updatePlayerState(playbackState: PlaybackState, song: Song) {
