@@ -1,0 +1,81 @@
+# Prompts Used to Create Android Music Player
+
+This file contains all the prompts used to develop this Android Music Player application, in chronological order.
+
+## Prompt 1: Initial App Requirements
+```
+we will be building an audio player for Android devices, using Kotlin as the programming language.  This application should be able to list available audio files stored on the device, in any common form such as MP3, WAV, WMA, etc.  This app should have common UI widgets to control the playing of the current song/track:  Pause/Play, Stop, Fast Forward, Reverse, Skip to next Track, Skip to previous track, as any audio player should have.
+```
+
+## Prompt 2: Compilation Error Resolution
+```
+android studio reported these errors:
+
+> Task :app:compileDebugKotlin FAILED
+e: file:///Users/stratej/AndroidStudioProjects/android_music_player/app/src/main/java/com/example/android_music_player/ui/components/PlayerControls.kt:120:49 Unresolved reference 'Shuffle'.
+e: file:///Users/stratej/AndroidStudioProjects/android_music_player/app/src/main/java/com/example/android_music_player/ui/components/PlayerControls.kt:136:49 Unresolved reference 'SkipPrevious'.
+e: file:///Users/stratej/AndroidStudioProjects/android_music_player/app/src/main/java/com/example/android_music_player/ui/components/PlayerControls.kt:154:64 Unresolved reference 'Pause'.
+e: file:///Users/stratej/AndroidStudioProjects/android_music_player/app/src/main/java/com/example/android_music_player/ui/components/PlayerControls.kt:155:64 Unresolved reference 'HourglassEmpty'.
+e: file:///Users/stratej/AndroidStudioProjects/android_music_player/app/src/main/java/com/example/android_music_player/ui/components/PlayerControls.kt:174:49 Unresolved reference 'SkipNext'.
+e: file:///Users/stratej/AndroidStudioProjects/android_music_player/app/src/main/java/com/example/android_music_player/ui/components/PlayerControls.kt:186:49 Unresolved reference 'Repeat'.
+e: file:///Users/stratej/AndroidStudioProjects/android_music_player/app/src/main/java/com/example/android_music_player/ui/components/PlayerControls.kt:205:45 Unresolved reference 'Stop'.
+e: file:///Users/stratej/AndroidStudioProjects/android_music_player/app/src/main/java/com/example/android_music_player/ui/components/SongListItem.kt:7:47 Unresolved reference 'MusicNote'.
+e: file:///Users/stratej/AndroidStudioProjects/android_music_player/app/src/main/java/com/example/android_music_player/ui/components/SongListItem.kt:61:29 Argument type mismatch: actual type is 'kotlin.Function0<kotlin.Unit>', but 'androidx.compose.ui.graphics.painter.Painter?' was expected.
+e: file:///Users/stratej/AndroidStudioProjects/android_music_player/app/src/main/java/com/example/android_music_player/ui/components/SongListItem.kt:62:25 @Composable invocations can only happen from the context of a @Composable function
+e: file:///Users/stratej/AndroidStudioProjects/android_music_player/app/src/main/java/com/example/android_music_player/ui/components/SongListItem.kt:63:57 Unresolved reference 'MusicNote'.
+e: file:///Users/stratej/AndroidStudioProjects/android_music_player/app/src/main/java/com/example/android_music_player/ui/components/SongListItem.kt:66:50 @Composable invocations can only happen from the context of a @Composable function
+e: file:///Users/stratej/AndroidStudioProjects/android_music_player/app/src/main/java/com/example/android_music_player/ui/components/SongListItem.kt:69:35 Argument type mismatch: actual type is 'kotlin.Function0<kotlin.Unit>', but 'androidx.compose.ui.graphics.painter.Painter?' was expected.
+e: file:///Users/stratej/AndroidStudioProjects/android_music_player/app/src/main/java/com/example/android_music_player/ui/components/SongListItem.kt:70:25 @Composable invocations can only happen from the context of a @Composable function
+e: file:///Users/stratej/AndroidStudioProjects/android_music_player/app/src/main/java/com/example/android_music_player/ui/components/SongListItem.kt:71:57 Unresolved reference 'MusicNote'.
+e: file:///Users/stratej/AndroidStudioProjects/android_music_player/app/src/main/java/com/example/android_music_player/ui/components/SongListItem.kt:74:50 @Composable invocations can only happen from the context of a @Composable function
+e: file:///Users/stratej/AndroidStudioProjects/android_music_player/app/src/main/java/com/example/android_music_player/ui/screens/MusicPlayerScreen.kt:8:47 Unresolved reference 'MusicNote'.
+e: file:///Users/stratej/AndroidStudioProjects/android_music_player/app/src/main/java/com/example/android_music_player/ui/screens/MusicPlayerScreen.kt:132:57 Unresolved reference 'MusicNote'.
+```
+
+## Prompt 3: Homebrew Installation Issue
+```
+when I try to do step 2 from option 1, the terminal window returns "brew not found"
+```
+
+## Prompt 4: Homebrew Path Issue
+```
+I just did that, brew is installed, but I suspect that it cannot find the path to it
+```
+
+## Prompt 5: Enhanced Features Request
+```
+does this project include managing songs in different categories (artist, album, playlist)?  If not, can we add that capability?  That is, a song should have a variety of attributes (that could be extended in the future):
+- artist name
+- album name
+- genre (e.g. pop, punk, country, alt-country, indie, etc) - this category should be extensible in the future.
+
+Additionally, we want to be able to manage songs by playlist.  A playlist is a list of songs in order.  A song can be a member of any number of playlists (without duplicating the song in local storage), so a playlist should just be a list of references to song items.
+```
+
+## Prompt 6: Documentation Request
+```
+great!  can you update README.md with a description of the capabilities of the app, and instructions for how to build and use it?
+```
+
+## Prompt 7: Software Design Documentation
+```
+great.  Now, I would like a summary of the architecture and software design of this app, to help me understand it better.  This does not belong in README.md, so let's add another .md file, call it SOFTWARE_DESIGN.md.  Make this description as clear and easy to understand as possible.  Also, if possible, add software diagrams to help illustrate the design
+```
+
+## Prompt 8: Prompts File Creation
+```
+next, can you create a new file in the project, called prompts.txt that contains the prompts I've used to create this app.  Keep it up to date as I add additional prompts
+```
+
+## Prompt 9: App Branding and Icon Update  
+```
+great.  Next, I would like to change the user-visible name of this app to "jPod".  Keep the project name and the repo name the same, just change the name of the app as it appears in the Android UI.  Also, add an icon for this app.  It should have an image similar to the attached image.
+```
+
+---
+
+## Notes:
+- This file will be updated with each new prompt used to enhance or modify the application
+- Each prompt includes the full context and requirements provided
+- Prompts are numbered chronologically for easy reference
+- This serves as a development history and requirements documentation

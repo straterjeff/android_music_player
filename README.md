@@ -1,6 +1,6 @@
-# 🎵 Android Music Player
+# 🎵 jPod - Android Music Player
 
-A feature-rich, modern Android music player built with **Kotlin** and **Jetpack Compose**. This app provides a comprehensive music library experience with advanced categorization, playlist management, and professional-grade audio playback.
+A feature-rich, modern Android music player built with **Kotlin** and **Jetpack Compose**. jPod provides a comprehensive music library experience with advanced categorization, playlist management, and professional-grade audio playback inspired by classic portable music players.
 
 ## ✨ Features
 
@@ -227,4 +227,4 @@ Contributions are welcome! Please feel free to submit pull requests or open issu
 
 ---
 
-**Built with ❤️ using Kotlin and Jetpack Compose**
+**jPod - Built with ❤️ using Kotlin and Jetpack Compose**

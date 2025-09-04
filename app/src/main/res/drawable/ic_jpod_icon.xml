@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Background circle -->
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M54,54m-54,0a54,54 0,1 1,108 0a54,54 0,1 1,-108 0"/>
+    
+    <!-- Main device body -->
+    <path android:fillColor="#2C2C2C"
+        android:pathData="M30,20 L78,20 Q82,20 82,24 L82,84 Q82,88 78,88 L30,88 Q26,88 26,84 L26,24 Q26,20 30,20 Z"/>
+    
+    <!-- Screen area -->
+    <path android:fillColor="#1A1A1A"
+        android:pathData="M32,26 L76,26 Q78,26 78,28 L78,44 Q78,46 76,46 L32,46 Q30,46 30,44 L30,28 Q30,26 32,26 Z"/>
+    
+    <!-- Screen highlight/reflection -->
+    <path android:fillColor="#333333"
+        android:pathData="M32,26 L76,26 Q78,26 78,28 L78,32 Q78,34 76,34 L32,34 Q30,34 30,32 L30,28 Q30,26 32,26 Z"/>
+    
+    <!-- Control wheel outer circle -->
+    <path android:fillColor="#3A3A3A"
+        android:pathData="M54,54m-20,0a20,20 0,1 1,40 0a20,20 0,1 1,-40 0"/>
+    
+    <!-- Control wheel inner circle -->
+    <path android:fillColor="#4A4A4A"
+        android:pathData="M54,54m-16,0a16,16 0,1 1,32 0a16,16 0,1 1,-32 0"/>
+    
+    <!-- Center button -->
+    <path android:fillColor="#DDDDDD"
+        android:pathData="M54,54m-8,0a8,8 0,1 1,16 0a8,8 0,1 1,-16 0"/>
+    
+    <!-- Center button highlight -->
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M54,54m-6,0a6,6 0,1 1,12 0a6,6 0,1 1,-12 0"/>
+    
+    <!-- Control wheel directional indicators -->
+    <!-- Top -->
+    <path android:fillColor="#666666"
+        android:pathData="M53,40 L55,40 L55,44 L53,44 Z"/>
+    <!-- Right -->
+    <path android:fillColor="#666666"
+        android:pathData="M64,53 L68,53 L68,55 L64,55 Z"/>
+    <!-- Bottom -->
+    <path android:fillColor="#666666"
+        android:pathData="M53,64 L55,64 L55,68 L53,68 Z"/>
+    <!-- Left -->
+    <path android:fillColor="#666666"
+        android:pathData="M40,53 L44,53 L44,55 L40,55 Z"/>
+    
+</vector>
