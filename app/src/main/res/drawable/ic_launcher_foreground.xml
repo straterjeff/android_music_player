@@ -4,50 +4,36 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
     
-    <!-- Main device body -->
-    <path android:fillColor="#2C2C2C"
-        android:pathData="M35,20 L73,20 Q78,20 78,25 L78,83 Q78,88 73,88 L35,88 Q30,88 30,83 L30,25 Q30,20 35,25 Z"/>
-    
-    <!-- Screen area -->
+    <!-- Device outer body (black border) -->
     <path android:fillColor="#000000"
-        android:pathData="M36,26 L72,26 Q74,26 74,28 L74,42 Q74,44 72,44 L36,44 Q34,44 34,42 L34,28 Q34,26 36,26 Z"/>
+        android:pathData="M40,25 L68,25 Q73,25 73,30 L73,78 Q73,83 68,83 L40,83 Q35,83 35,78 L35,30 Q35,25 40,25 Z"/>
     
-    <!-- Screen highlight -->
-    <path android:fillColor="#1A1A1A"
-        android:pathData="M36,26 L72,26 Q74,26 74,28 L74,30 Q74,32 72,32 L36,32 Q34,32 34,30 L34,28 Q34,26 36,26 Z"/>
+    <!-- Device inner body (white) -->
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M40,25 L68,25 Q71,25 71,28 L71,80 Q71,83 68,83 L40,83 Q37,83 37,80 L37,28 Q37,25 40,25 Z"/>
     
-    <!-- Control wheel outer ring -->
-    <path android:fillColor="#3A3A3A"
-        android:pathData="M54,54m-18,0a18,18 0,1 1,36 0a18,18 0,1 1,-36 0"/>
+    <!-- Screen outer (black border) -->
+    <path android:fillColor="#000000"
+        android:pathData="M42,30 L66,30 Q68,30 68,32 L68,42 Q68,44 66,44 L42,44 Q40,44 40,42 L40,32 Q40,30 42,30 Z"/>
     
-    <!-- Control wheel inner area -->
-    <path android:fillColor="#4A4A4A"
-        android:pathData="M54,54m-14,0a14,14 0,1 1,28 0a14,14 0,1 1,-28 0"/>
+    <!-- Screen inner (white) -->
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M43,31 L65,31 Q66,31 66,32 L66,42 Q66,43 65,43 L43,43 Q42,43 42,42 L42,32 Q42,31 43,31 Z"/>
+    
+    <!-- Letter J -->
+    <path android:fillColor="#000000"
+        android:pathData="M50,34 L53,34 L53,39 Q53,41 51,41 L49,41 Q47,41 47,39 L47,38 L49,38 L49,39 L51,39 L51,34 L50,34 Z"/>
+    
+    <!-- Control wheel outer -->
+    <path android:fillColor="#000000"
+        android:pathData="M54,64m-14,0a14,14 0,1 1,28 0a14,14 0,1 1,-28 0"/>
+    
+    <!-- Control wheel inner -->
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M54,64m-11,0a11,11 0,1 1,22 0a11,11 0,1 1,-22 0"/>
     
     <!-- Center button -->
-    <path android:fillColor="#DDDDDD"
-        android:pathData="M54,54m-7,0a7,7 0,1 1,14 0a7,7 0,1 1,-14 0"/>
+    <path android:fillColor="#000000"
+        android:pathData="M54,64m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0"/>
     
-    <!-- Center button highlight -->
-    <path android:fillColor="#FFFFFF"
-        android:pathData="M54,54m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0"/>
-    
-    <!-- Control directional marks -->
-    <!-- Top mark -->
-    <path android:fillColor="#666666"
-        android:pathData="M53,42 L55,42 L55,46 L53,46 Z"/>
-    <!-- Right mark -->
-    <path android:fillColor="#666666"
-        android:pathData="M62,53 L66,53 L66,55 L62,55 Z"/>
-    <!-- Bottom mark -->
-    <path android:fillColor="#666666"
-        android:pathData="M53,62 L55,62 L55,66 L53,66 Z"/>
-    <!-- Left mark -->
-    <path android:fillColor="#666666"
-        android:pathData="M42,53 L46,53 L46,55 L42,55 Z"/>
-        
-    <!-- Device edge highlight -->
-    <path android:fillColor="#454545" 
-        android:pathData="M35,20 L73,20 Q78,20 78,25 L78,27 Q78,22 73,22 L35,22 Q30,22 30,27 L30,25 Q30,20 35,20 Z"/>
-        
 </vector>

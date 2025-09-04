@@ -72,6 +72,21 @@ next, can you create a new file in the project, called prompts.txt that contains
 great.  Next, I would like to change the user-visible name of this app to "jPod".  Keep the project name and the repo name the same, just change the name of the app as it appears in the Android UI.  Also, add an icon for this app.  It should have an image similar to the attached image.
 ```
 
+## Prompt 10: Icon Design Refinement  
+```
+can you preview the icon created?  I can't tell what it really looks like, but I'd like to make some changes.  I'd like the icon to look more like the attached image
+```
+
+## Prompt 11: Icon Layout and Spacing Fixes  
+```
+this is the icon I see in the simulator in Android Studio.  As you can tell, it is not quite what the image goal was.  Parts of it are cut off, and the "screen" rectangle and "control wheel" circles overlap
+```
+
+## Prompt 12: Icon Scaling for Better Outline Visibility  
+```
+better.  Maybe scale it down a bit more so we can see the outer rectangle outline in the icon.
+```
+
 ---
 
 ## Notes:
