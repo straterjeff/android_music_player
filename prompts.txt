@@ -97,6 +97,120 @@ next we need some sample music to test our app.  I have a zip file of MP3s.  How
 let's use the ADB method, but I do not appear to have ADB installed.  Also: make sure to update README.md to include how to set up ADB for future information
 ```
 
+## Prompt 15: Physical Device Support and Dedicated Music Folder  
+```
+this is great.  The simulator works fine.  However, running it on a physical device does not see the sample MP3 data.  I need to be able to copy data to a physical device as well.
+
+Also:  The physical device also picked up a lot of other audio files from other applications, which I don't want.  Can we put music for jPod into a special folder in the sdcard folder, and organized by artist and album, as you recommended above, and then have jPod only look there for content?
+```
+
+## Prompt 16: Rebuild Required for MusicScanner Changes  
+```
+it says "no songs found".  It might need to build again because I don't think I accepted MusicScanner.kt before
+```
+
+## Prompt 17: Debug "No Songs Found" Issue  
+```
+no songs found on either the emulator or physical device
+```
+
+## Prompt 18: Success on Emulator, Testing Physical Device  
+```
+that worked on the emulator.  I see only the content we downloaded.  Should it work on the physical device, too?
+```
+
+## Prompt 19: Physical Device Different Behavior  
+```
+I do not see the same behavior on the physical device.  I see other audio files, and do NOT see the Dave Hause files
+```
+
+## Prompt 20: jPod Directory Filter Issue  
+```
+no, it is worse.  "no songs found" on either device
+```
+
+## Prompt 21: Filter Path Mismatch Investigation  
+```
+both the emulator and physical device show "no songs found"
+```
+
+## Prompt 22: Emulator Working, Files in Wrong Directory  
+```
+emulator shows Dave Hause songs, and they play correctly
+```
+
+## Prompt 23: Physical Device Still Not Working  
+```
+emulator is fine, but the physical device still shows "no songs found"
+```
+
+## Prompt 24: MediaStore Indexing Issue  
+```
+I am not sure what is going on
+```
+
+## Prompt 25: Still No Songs After Reboot  
+```
+still no songs found
+```
+
+## Prompt 26: MediaStore Working, jPod Directory Issue Confirmed  
+```
+nope.  The physical device now shows lots of other audio files, and does not show any Dave Hause songs
+```
+
+## Prompt 27: Back to Same Issue After Directory Move  
+```
+now we are back to:  works fine on the emulator, and "no songs found" on the physical device
+```
+
+## Prompt 28: MediaStore Working But Files Missing  
+```
+nope.  The physical device now shows lots of other audio files, and does not show any Dave Hause songs
+```
+
+## Prompt 29: Still Not Finding Songs After Reboot  
+```
+still no songs found
+```
+
+## Prompt 30: Debug Logging Shows Empty Results  
+```
+I am not sure what is going on
+```
+
+## Prompt 31: Still No Songs After All Fixes  
+```
+still no songs found
+```
+
+## Prompt 32: Files Not Found Even With Broader Query  
+```
+sorry - still no songs found
+```
+
+## Prompt 33: MediaStore Access Working, Dave Hause Missing  
+```
+back to seeing lots of other audio files (Merlin, etc), but none of the MP3s that we downloaded to the phone
+```
+
+## Prompt 34: Success - MediaStore Issue Resolved  
+```
+success!  Now we see the Dave Hause songs, plus all the Merlin and Recorder files
+```
+
+## Prompt 35: Final Success and Folder Structure Question  
+```
+OK it works on both the phone and the emulator!  So, does this mean we have to abandon the recommended folder structure?
+
+Also, remember to record all prompts.  Seems like we haven't done that for a few steps
+```
+
+## Prompt 36: Keep Simple Structure, Test Later  
+```
+let's stick with simple for now.  Will be interesting to see what happens when we download a second Dave Hause album, and also another artist.  We'll try that later
+```
+
 ---
 
 ## Notes:

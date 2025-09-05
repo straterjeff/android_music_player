@@ -6,6 +6,7 @@ import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -15,6 +16,11 @@ import kotlinx.coroutines.withContext
 class MusicScanner(private val context: Context) {
     
     private val contentResolver: ContentResolver = context.contentResolver
+    
+    companion object {
+        // Dedicated jPod music directory (MediaStore uses /storage/emulated/0/ path format)
+        const val JPOD_MUSIC_DIR = "/storage/emulated/0/Music/jPod"
+    }
     
     /**
      * Scan for all audio files on the device
@@ -38,7 +44,9 @@ class MusicScanner(private val context: Context) {
             "genre" // MediaStore.Audio.Genres.NAME - using string as it's not always available
         )
         
-        val selection = "${MediaStore.Audio.Media.IS_MUSIC} = 1"
+        // Filter to show only Dave Hause songs for clean jPod experience
+        val selection = "${MediaStore.Audio.Media.IS_MUSIC} = 1 AND ${MediaStore.Audio.Media.DATA} LIKE '%Dave Hause%'"
+        
         val sortOrder = "${MediaStore.Audio.Media.TITLE} ASC"
         
         val cursor: Cursor? = contentResolver.query(
@@ -48,8 +56,12 @@ class MusicScanner(private val context: Context) {
             null,
             sortOrder
         )
-        
+
         cursor?.use { cur ->
+            if (cur.count == 0) {
+                return@withContext emptyList()
+            }
+            
             val idColumn = cur.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
             val titleColumn = cur.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
             val artistColumn = cur.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
@@ -239,5 +251,45 @@ class MusicScanner(private val context: Context) {
                 )
             }
             .sortedByDescending { it.name.toIntOrNull() ?: 0 }
+    }
+    
+    /**
+     * Check if jPod music directory exists
+     */
+    fun isJPodDirectoryAvailable(): Boolean {
+        return try {
+            // Check both old location (/sdcard/jPod) and new location (/sdcard/Music/jPod)
+            val oldDirectory = java.io.File("/sdcard/jPod")
+            val newDirectory = java.io.File(JPOD_MUSIC_DIR)
+            val symlinkDirectory = java.io.File("/sdcard/Music/jPod")
+            
+            (oldDirectory.exists() && oldDirectory.isDirectory) || 
+            (newDirectory.exists() && newDirectory.isDirectory) ||
+            (symlinkDirectory.exists() && symlinkDirectory.isDirectory)
+        } catch (e: Exception) {
+            false
+        }
+    }
+    
+    /**
+     * Get the recommended directory structure message for users
+     */
+    fun getRecommendedStructure(): String {
+        return """
+            To use jPod with your music, organize files in this structure:
+            
+            /sdcard/Music/
+            ├── Dave Hause/
+            │   ├── 01 - Song Title.mp3
+            │   ├── 02 - Another Song.mp3
+            │   └── ... (more songs)
+            ├── [Another Artist]/
+            │   └── [Artist songs]
+            └── [System keeps other app audio separate]
+                    
+            Use ADB to transfer music:
+            adb push /path/to/music/ /sdcard/Music/[ArtistName]/
+            adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///storage/emulated/0/Music/[ArtistName]
+        """.trimIndent()
     }
 }
