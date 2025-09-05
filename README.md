@@ -122,6 +122,118 @@ Browse your music collection by:
 ./gradlew assembleRelease
 ```
 
+## 🎵 **Testing with Sample Music**
+
+### ADB Setup for File Transfer
+
+To test jPod with your own music files, you'll need **ADB (Android Debug Bridge)** to transfer MP3s to the emulator or device.
+
+#### Installing ADB
+
+**On macOS (recommended):**
+```bash
+# Install via Homebrew
+brew install android-platform-tools
+```
+
+**On Windows:**
+1. Download [Android Platform Tools](https://developer.android.com/studio/releases/platform-tools)
+2. Extract and add to your system PATH
+3. Or use Android Studio's built-in ADB: `~/Library/Android/sdk/platform-tools/`
+
+**On Linux:**
+```bash
+# Ubuntu/Debian
+sudo apt install android-tools-adb
+
+# Arch Linux
+sudo pacman -S android-tools
+```
+
+#### Verify ADB Installation
+```bash
+adb version
+# Should show: Android Debug Bridge version X.X.X
+```
+
+### Transferring Music Files
+
+#### 1. Check Connected Devices
+```bash
+adb devices
+# Should show your emulator or device listed
+```
+
+#### 2. Create Music Directory
+```bash
+adb shell mkdir -p /sdcard/Music
+```
+
+#### 3. Transfer Your Music Files
+```bash
+# Extract your music files locally first
+unzip your_music.zip -d ~/jPod_test_music/
+
+# Transfer individual files
+adb push ~/jPod_test_music/song.mp3 /sdcard/Music/
+
+# Transfer entire directory
+adb push ~/jPod_test_music/ /sdcard/Music/
+
+# Transfer with organized structure
+adb push ~/jPod_test_music/Artist1/ /sdcard/Music/Artist1/
+```
+
+#### 4. Trigger Media Scanner
+After transferring files, trigger Android's media scanner to detect them:
+```bash
+# Scan specific directory
+adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Music/
+
+# Scan entire external storage
+adb shell am broadcast -a android.intent.action.MEDIA_MOUNTED -d file:///sdcard
+```
+
+#### 5. Install and Test jPod
+```bash
+# Install the app
+./gradlew installDebug
+
+# Launch jPod and grant permissions when prompted
+# Your music files should appear automatically!
+```
+
+### Recommended Directory Structure
+For optimal organization, structure your music files like this:
+```
+/sdcard/Music/
+├── Artist Name/
+│   ├── Album Name/
+│   │   ├── 01 - Song Title.mp3
+│   │   ├── 02 - Another Song.mp3
+│   │   └── cover.jpg (optional album art)
+│   └── Another Album/
+│       └── 01 - Song.mp3
+└── Another Artist/
+    └── Album/
+        └── song.mp3
+```
+
+### Testing Features
+Once music is loaded, test these jPod capabilities:
+- ✅ **Playback Controls**: Play, pause, skip, seek
+- ✅ **Categories**: Browse by Artist, Album, Genre  
+- ✅ **Search**: Find songs by title, artist, album
+- ✅ **Playlists**: Create and manage custom playlists
+- ✅ **Favorites**: Star/unstar songs
+- ✅ **Recently Played**: Check playback history
+
+### Troubleshooting
+- **No music appears**: Check permissions and trigger media scanner
+- **ADB not found**: Ensure platform-tools are in your PATH
+- **Device not detected**: Enable USB Debugging on physical devices
+- **Transfer fails**: Check available storage space on device
+
 ## 📋 **Permissions Required**
 
 The app requires the following permissions:

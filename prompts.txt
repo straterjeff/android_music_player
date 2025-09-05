@@ -87,6 +87,16 @@ this is the icon I see in the simulator in Android Studio.  As you can tell, it 
 better.  Maybe scale it down a bit more so we can see the outer rectangle outline in the icon.
 ```
 
+## Prompt 13: Sample Music Setup for Testing  
+```
+next we need some sample music to test our app.  I have a zip file of MP3s.  How can we best use these to test the app?
+```
+
+## Prompt 14: ADB Installation and Setup Request  
+```
+let's use the ADB method, but I do not appear to have ADB installed.  Also: make sure to update README.md to include how to set up ADB for future information
+```
+
 ---
 
 ## Notes:
