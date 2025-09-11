@@ -281,11 +281,7 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
         mediaController?.let { controller ->
             if (controller.hasNextMediaItem()) {
                 controller.seekToNext()
-                val playlist = _currentPlaylist.value
-                val currentIndex = _currentSongIndex.value
-                if (currentIndex < playlist.size - 1) {
-                    _currentSongIndex.value = currentIndex + 1
-                }
+                // Index update handled by onMediaItemTransition listener
             }
         }
     }
@@ -297,11 +293,7 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
         mediaController?.let { controller ->
             if (controller.hasPreviousMediaItem()) {
                 controller.seekToPrevious()
-                val playlist = _currentPlaylist.value
-                val currentIndex = _currentSongIndex.value
-                if (currentIndex > 0) {
-                    _currentSongIndex.value = currentIndex - 1
-                }
+                // Index update handled by onMediaItemTransition listener
             }
         }
     }
@@ -475,7 +467,7 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
                     _songs.value.filter { 
                         it.artist.equals(artist, ignoreCase = true) && 
                         it.album.equals(album, ignoreCase = true) 
-                    }
+                    }.sortedBy { it.track } // Sort by track number for proper album order
                 } else {
                     emptyList()
                 }

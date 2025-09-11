@@ -287,3 +287,33 @@ let's debug this separately.  First, let's look at the emulator.  If I go into F
    - Updated getRecommendedStructure() to be generic for any artist
    - Added missing prompts 46-47 to prompts.txt file
    - App now ready for multiple artists without code changes
+
+48. **Multi-Artist Testing** - "before we change the folder structure, let's add more music. There is a folder in Downloads called "fantastic_cat" that contains M4A songs from a band called "Fantastic Cat", and the album is "The Very Best of Fantastic Cat". Can we add that to jPod? Then we can test out artist filtering."
+   - Added Fantastic Cat (10 M4A files) to test multi-artist browsing functionality
+   - Transferred ~/Downloads/fantastic_cat/ to /sdcard/Music/fantastic_cat/
+   - Applied touch command to ensure M4A files get is_music flag
+   - Cleared MediaStore cache and triggered rescan for all music
+   - Expected result: 32 total songs (Dave Hause: 22, Fantastic Cat: 10)
+   - Ready to test Artist browsing with multiple artists
+
+49. **Emulator Multi-Artist Setup** - "great. That works. Let's add this album to the emulator, too"
+   - User confirmed Fantastic Cat working perfectly on Pixel 8
+   - Added Fantastic Cat album to emulator for consistent testing across both devices
+   - Transferred ~/Downloads/fantastic_cat/ to emulator /sdcard/Music/fantastic_cat/
+   - Applied touch command and cleared MediaStore cache on emulator
+   - Both devices now have identical multi-artist setup: 2 artists, 3 albums, 32 songs
+   - Ready for comprehensive multi-artist testing on both Pixel 8 and emulator
+
+50. **UI Improvements: Album Order & Player Controls** - "great, that works on both devices. Now, I have some UI changes: 1. When navigating into an album, from the Albums screen, I want the songs on that album shown in album order, not alphabetically 2. When playing songs from any sub-screen (Artists, Album, etc), show the player on that screen, not just on the Home screen. This is so I can play an entire album from that view, in album order, and pause, fast forward, etc without returning to the home screen"
+   - Fixed album song sorting: Modified MusicPlayerViewModel.getCategorySongs() to sort by track number (.sortedBy { it.track })
+   - Added player controls to all screens: Enhanced BrowseScreen and CategorySongsScreen with PlayerControls component
+   - Player controls now show on Artists, Albums, Genres screens when music is playing
+   - Seamless playback control without returning to home screen
+   - Album tracks now display in proper track order (1, 2, 3...) instead of alphabetical
+   - Both improvements successfully deployed to Pixel 8 and emulator
+
+51. **UI Bug Fixes: Player Controls Persistence & Double Skip** - "couple of small problems: 1. if I start the player from an album view, the player appears on that screen. That is great. When I hit Stop, the player disappears. Again, great. However, if I then navigate back from a single album screen to the Albums screen, or back to the Home screen, the player widget is still shown 2. In the album view, if a song is playing, and I hit "skip to next track", it skips two tracks ahead, not one"
+   - Issue 1: Player controls persisting after stop - Fixed condition in all screens (MusicPlayerScreen, BrowseScreen, CategorySongsScreen) to check both currentSong != null AND playbackState != STOPPED
+   - Issue 2: Skip next advancing two tracks - Fixed double-skip by removing manual index updates from skipToNext()/skipToPrevious() since onMediaItemTransition listener already handles index updates
+   - Root cause of Issue 2: controller.seekToNext() triggers listener which updates index, then manual index update happened again = double advance
+   - Both fixes successfully deployed to Pixel 8 and emulator

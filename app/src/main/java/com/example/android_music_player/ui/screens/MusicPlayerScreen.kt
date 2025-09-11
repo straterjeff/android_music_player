@@ -39,9 +39,10 @@ fun MusicPlayerScreen(
     var searchQuery by remember { mutableStateOf("") }
     var isSearchExpanded by remember { mutableStateOf(false) }
     
-    // Show player controls when a song is selected
-    LaunchedEffect(playerState.currentSong) {
-        showPlayerControls = playerState.currentSong != null
+    // Show player controls when a song is selected and not stopped
+    LaunchedEffect(playerState.currentSong, playerState.playbackState) {
+        showPlayerControls = playerState.currentSong != null && 
+                            playerState.playbackState != PlaybackState.STOPPED
     }
     
     Column(

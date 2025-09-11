@@ -17,6 +17,7 @@ import com.example.android_music_player.data.CategoryItem
 import com.example.android_music_player.data.PlaybackState
 import com.example.android_music_player.ui.components.CategoryCard
 import com.example.android_music_player.ui.components.SongListItem
+import com.example.android_music_player.ui.components.PlayerControls
 import com.example.android_music_player.viewmodel.MusicPlayerViewModel
 
 /**
@@ -36,6 +37,14 @@ fun BrowseScreen(
     
     val categoryItems = categories[category] ?: emptyList()
     val categoryName = getCategoryDisplayName(category)
+    
+    // Show player controls if there's a current song and it's not stopped
+    var showPlayerControls by remember { mutableStateOf(false) }
+    
+    LaunchedEffect(playerState.currentSong, playerState.playbackState) {
+        showPlayerControls = playerState.currentSong != null && 
+                            playerState.playbackState != PlaybackState.STOPPED
+    }
     
     Column(
         modifier = Modifier.fillMaxSize()
@@ -57,6 +66,31 @@ fun BrowseScreen(
                 }
             }
         )
+        
+        if (showPlayerControls) {
+            // Player Controls Section
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                PlayerControls(
+                    playerState = playerState,
+                    onPlayPause = { viewModel.togglePlayPause() },
+                    onStop = { 
+                        viewModel.stop()
+                        showPlayerControls = false
+                    },
+                    onSkipNext = { viewModel.skipToNext() },
+                    onSkipPrevious = { viewModel.skipToPrevious() },
+                    onSeek = { position -> viewModel.seekTo(position) },
+                    onShuffleToggle = { viewModel.setShuffleEnabled(!playerState.isShuffleEnabled) },
+                    onRepeatToggle = { viewModel.setRepeatEnabled(!playerState.isRepeatEnabled) },
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        }
         
         // Content
         Box(
@@ -134,6 +168,14 @@ fun CategorySongsScreen(
     val playerState by viewModel.playerState.collectAsState()
     val songs = viewModel.getCategorySongs(category, itemId)
     
+    // Show player controls if there's a current song and it's not stopped
+    var showPlayerControls by remember { mutableStateOf(false) }
+    
+    LaunchedEffect(playerState.currentSong, playerState.playbackState) {
+        showPlayerControls = playerState.currentSong != null && 
+                            playerState.playbackState != PlaybackState.STOPPED
+    }
+    
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -154,6 +196,31 @@ fun CategorySongsScreen(
                 }
             }
         )
+        
+        if (showPlayerControls) {
+            // Player Controls Section
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                PlayerControls(
+                    playerState = playerState,
+                    onPlayPause = { viewModel.togglePlayPause() },
+                    onStop = { 
+                        viewModel.stop()
+                        showPlayerControls = false
+                    },
+                    onSkipNext = { viewModel.skipToNext() },
+                    onSkipPrevious = { viewModel.skipToPrevious() },
+                    onSeek = { position -> viewModel.seekTo(position) },
+                    onShuffleToggle = { viewModel.setShuffleEnabled(!playerState.isShuffleEnabled) },
+                    onRepeatToggle = { viewModel.setRepeatEnabled(!playerState.isRepeatEnabled) },
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        }
         
         // Songs list
         Box(
