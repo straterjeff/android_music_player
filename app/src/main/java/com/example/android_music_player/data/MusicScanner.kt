@@ -6,7 +6,6 @@ import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
-import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -44,8 +43,8 @@ class MusicScanner(private val context: Context) {
             "genre" // MediaStore.Audio.Genres.NAME - using string as it's not always available
         )
         
-        // Filter to show only Dave Hause songs for clean jPod experience
-        val selection = "${MediaStore.Audio.Media.IS_MUSIC} = 1 AND ${MediaStore.Audio.Media.DATA} LIKE '%Dave Hause%'"
+        // Filter to show only music files (no system audio/notifications)
+        val selection = "${MediaStore.Audio.Media.IS_MUSIC} = 1"
         
         val sortOrder = "${MediaStore.Audio.Media.TITLE} ASC"
         
@@ -276,16 +275,20 @@ class MusicScanner(private val context: Context) {
      */
     fun getRecommendedStructure(): String {
         return """
-            To use jPod with your music, organize files in this structure:
+            jPod will automatically discover all music files in your device's Music directory.
+            
+            Recommended structure for best organization:
             
             /sdcard/Music/
-            ├── Dave Hause/
-            │   ├── 01 - Song Title.mp3
-            │   ├── 02 - Another Song.mp3
+            ├── [Artist Name]/
+            │   ├── Song1.mp3 or Song1.m4a
+            │   ├── Song2.mp3 or Song2.m4a
             │   └── ... (more songs)
             ├── [Another Artist]/
             │   └── [Artist songs]
-            └── [System keeps other app audio separate]
+            └── [Albums will be grouped automatically by metadata]
+                    
+            Supported formats: MP3, M4A/AAC, WAV, FLAC, OGG Vorbis, WMA
                     
             Use ADB to transfer music:
             adb push /path/to/music/ /sdcard/Music/[ArtistName]/

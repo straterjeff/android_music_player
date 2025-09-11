@@ -211,6 +211,46 @@ Also, remember to record all prompts.  Seems like we haven't done that for a few
 let's stick with simple for now.  Will be interesting to see what happens when we download a second Dave Hause album, and also another artist.  We'll try that later
 ```
 
+## Prompt 37: Add Second Dave Hause Album  
+```
+OK, next, let's add another Dave Hause album.  A zip of the Devour album is in the Downloads directory
+```
+
+## Prompt 38: Missing is_music Flag for Devour Album  
+```
+on the phone, I only see songs from "...And The Mermaid".  If I recall, we had to specifically mark the files with some kind of "is_music" tag.  Did you do that?
+```
+
+## Prompt 39: Subdirectory Structure Issue  
+```
+only tested the phone, and again, no songs from Devour appeared.  If I recall, we had a very simple folder structure to make the other album work.  Did we add a subdirectory this time?
+```
+
+## Prompt 40: Duplicates and Missing Devour Songs  
+```
+OK, this is weird.  The emulator shows songs from "and the mermaid" twice, and nothing from "devour", and the phone shows only one copy of "and the mermaid" songs, and also nothing from "devour"
+```
+
+## Prompt 41: Format Compatibility Issue Conclusion  
+```
+same result - two copies of the old song on the emulator, one on the phone, but no devour songs on either.
+```
+
+## Prompt 42: Persistent MediaStore Issues  
+```
+same problem as before:  On the phone, I only see 10 songs, all from "Mermaid", and none from "Devour", and on the emulator, I see 20 songs, but all are from "Mermaid", and each song appears in the UI twice
+```
+
+## Prompt 43: Try Alternative MP3 Conversion  
+```
+OK, I have tried another conversion to MP3.  There is a file in Downloads called Devour_mp3.zip - let's try these
+```
+
+## Prompt 44: Emulator Debug Request  
+```
+let's debug this separately.  First, let's look at the emulator.  If I go into Files on the emulator, and click on Audio, I see two copies of the "Mermaid" songs, and no copies of the "Devour" songs.  That agrees with what I see in the jPod app.  So, first, let's fix up the data on the emulator.
+```
+
 ---
 
 ## Notes:
@@ -218,3 +258,32 @@ let's stick with simple for now.  Will be interesting to see what happens when w
 - Each prompt includes the full context and requirements provided
 - Prompts are numbered chronologically for easy reference
 - This serves as a development history and requirements documentation
+
+45. **Albums Navigation Fix** - "that worked on the emulator!! Now, what should I expect the "Albums" button to do? Right now it does nothing"
+   - User confirmed M4A files worked perfectly on emulator (22 songs total)
+   - Original M4A approach was the correct solution - no conversion needed
+   - Albums button had no navigation because callbacks weren't connected in MainActivity
+   - Added proper navigation structure with BrowseScreen and CategorySongsScreen
+   - Connected Albums button to show album cards for "...And The Mermaid" and "Devour"
+   - Restored proper music filtering (removed debug null filter)
+   - Cleaned up debug logging
+   - User should now see 2 album cards when clicking Albums button
+
+46. **M4A Format Testing** - "first try option 1"
+   - User requested to test original M4A files instead of converted MP3s
+   - Extracted original Devour.zip containing 12 M4A files with proper metadata
+   - Uploaded all original M4A files to emulator flat structure
+   - Cleared MediaStore cache and triggered rescan
+   - SUCCESS: MediaStore now indexed all 22 songs (10 MP3 + 12 M4A)
+   - M4A files showed proper metadata: artist, album, titles
+   - Both MP3 and M4A formats work natively in Android
+   - Key lesson: Original files > converted files (avoid unnecessary conversions)
+
+47. **Filter Removal & Scalability** - "yes, everything works on the emulator now. In fact, the M4A format seems to be better, at least in this case, because it shows album art! The Album and Artist buttons seem to work well. One question: Do we really need the 'Dave Hause' filter in MusicScanner.kt? Eventually we will want to add other artists, and hopefully will not need to modify code to do so. Also: We seem to have dropped a few prompts along the way, for prompts.txt"
+   - User confirmed emulator working perfectly with both albums and navigation
+   - M4A format provides better metadata including album art
+   - User correctly identified hardcoded "Dave Hause" filter as non-scalable
+   - Removed artist-specific filter, now uses only IS_MUSIC = 1 for clean music files
+   - Updated getRecommendedStructure() to be generic for any artist
+   - Added missing prompts 46-47 to prompts.txt file
+   - App now ready for multiple artists without code changes

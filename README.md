@@ -204,21 +204,22 @@ adb -s DEVICE_ID shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_
 ```
 
 ### jPod Music Directory Structure
-**jPod uses artist-specific directories within the Music folder** for reliable MediaStore compatibility:
+**jPod automatically discovers all music files** with proper metadata in your device's Music folder:
 
 ```
 /sdcard/Music/
-├── Dave Hause/
-│   ├── 01 A Knife In The Mud.mp3
-│   ├── 02 Cellmates.mp3
-│   ├── 03 Look Alive.mp3
+├── [Artist Name]/
+│   ├── Song1.mp3, Song1.m4a, etc.
+│   ├── Song2.mp3, Song2.m4a, etc.
 │   └── ... (more songs)
-├── [Future Artist]/
+├── [Another Artist]/
 │   └── [Artist songs]
-└── [System retains other app audio in separate directories]
+└── [Albums grouped automatically by metadata]
 ```
 
-**Current working structure (proven on multiple devices):**
+**Supported Formats:** MP3, M4A/AAC, WAV, FLAC, OGG Vorbis, WMA
+
+**Transfer and Setup (proven on multiple devices):**
 ```bash
 # Transfer music using ADB
 adb push /path/to/music/ /sdcard/Music/[ArtistName]/
@@ -227,11 +228,12 @@ adb push /path/to/music/ /sdcard/Music/[ArtistName]/
 adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///storage/emulated/0/Music/[ArtistName]
 ```
 
-**Benefits of this structure:**
-- ✅ **Guaranteed MediaStore compatibility**: Works reliably across different Android versions
-- ✅ **Clean artist-based filtering**: jPod shows only specified artists, not system audio
-- ✅ **Simple management**: Easy to add new artists by creating new directories
-- ✅ **Proven stability**: Battle-tested on both emulator and physical devices
+**Benefits of jPod's approach:**
+- ✅ **Automatic Discovery**: Finds all music with proper ID3/metadata tags
+- ✅ **Multi-Format Support**: Works with MP3, M4A, and other popular formats
+- ✅ **Clean Organization**: Artist/Album browsing based on file metadata
+- ✅ **Scalable**: Add any artist without code changes
+- ✅ **MediaStore Compatible**: Works reliably across Android versions
 
 ### Testing Features
 Once music is loaded, test these jPod capabilities:

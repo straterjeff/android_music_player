@@ -13,6 +13,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.android_music_player.data.BrowseCategory
+import com.example.android_music_player.data.CategoryItem
+import com.example.android_music_player.ui.screens.BrowseScreen
+import com.example.android_music_player.ui.screens.CategorySongsScreen
 import com.example.android_music_player.ui.screens.MusicPlayerScreen
 import com.example.android_music_player.ui.theme.Android_music_playerTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -54,8 +58,8 @@ fun MusicPlayerApp() {
     ) {
         when {
             permissionsState.allPermissionsGranted -> {
-                // All permissions granted, show the music player
-                MusicPlayerScreen()
+                // All permissions granted, show the music player with navigation
+                MusicPlayerAppContent()
             }
             permissionsState.shouldShowRationale -> {
                 // Show rationale and request permissions again
@@ -68,6 +72,55 @@ fun MusicPlayerApp() {
             else -> {
                 // Permissions denied permanently
                 PermissionDeniedScreen()
+            }
+        }
+    }
+}
+
+@Composable
+fun MusicPlayerAppContent() {
+    // Navigation state
+    var currentScreen by remember { mutableStateOf("home") }
+    var currentCategory by remember { mutableStateOf<BrowseCategory?>(null) }
+    var currentCategoryItem by remember { mutableStateOf<CategoryItem?>(null) }
+    
+    when (currentScreen) {
+        "home" -> {
+            MusicPlayerScreen(
+                onBrowseCategory = { category ->
+                    currentCategory = category
+                    currentScreen = "browse"
+                }
+            )
+        }
+        "browse" -> {
+            currentCategory?.let { category ->
+                BrowseScreen(
+                    category = category,
+                    onBackClick = { 
+                        currentScreen = "home"
+                        currentCategory = null
+                    },
+                    onCategoryItemClick = { categoryItem ->
+                        currentCategoryItem = categoryItem
+                        currentScreen = "category_songs"
+                    }
+                )
+            }
+        }
+        "category_songs" -> {
+            currentCategory?.let { category ->
+                currentCategoryItem?.let { categoryItem ->
+                    CategorySongsScreen(
+                        category = category,
+                        itemId = categoryItem.id,
+                        itemName = categoryItem.name,
+                        onBackClick = {
+                            currentScreen = "browse"
+                            currentCategoryItem = null
+                        }
+                    )
+                }
             }
         }
     }
