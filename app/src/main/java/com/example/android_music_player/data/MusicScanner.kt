@@ -17,8 +17,8 @@ class MusicScanner(private val context: Context) {
     private val contentResolver: ContentResolver = context.contentResolver
     
     companion object {
-        // Dedicated jPod music directory (MediaStore uses /storage/emulated/0/ path format)
-        const val JPOD_MUSIC_DIR = "/storage/emulated/0/Music/jPod"
+        // Music directory - only scan files from the standard Music folder
+        const val MUSIC_DIR = "/storage/emulated/0/Music/"
     }
     
     /**
@@ -43,8 +43,12 @@ class MusicScanner(private val context: Context) {
             "genre" // MediaStore.Audio.Genres.NAME - using string as it's not always available
         )
         
-        // Filter to show only music files (no system audio/notifications)
-        val selection = "${MediaStore.Audio.Media.IS_MUSIC} = 1"
+        // Filter to show only music files from Music folder, excluding system/app directories
+        val selection = "${MediaStore.Audio.Media.IS_MUSIC} = 1 AND " +
+                "${MediaStore.Audio.Media.DATA} LIKE '$MUSIC_DIR%' AND " +
+                "${MediaStore.Audio.Media.DATA} NOT LIKE '${MUSIC_DIR}Merlin/%' AND " +
+                "${MediaStore.Audio.Media.DATA} NOT LIKE '${MUSIC_DIR}Audio_Lab/%' AND " +
+                "${MediaStore.Audio.Media.DATA} NOT LIKE '${MUSIC_DIR}.thumbnails/%'"
         
         val sortOrder = "${MediaStore.Audio.Media.TITLE} ASC"
         
@@ -253,18 +257,12 @@ class MusicScanner(private val context: Context) {
     }
     
     /**
-     * Check if jPod music directory exists
+     * Check if Music directory exists
      */
-    fun isJPodDirectoryAvailable(): Boolean {
+    fun isMusicDirectoryAvailable(): Boolean {
         return try {
-            // Check both old location (/sdcard/jPod) and new location (/sdcard/Music/jPod)
-            val oldDirectory = java.io.File("/sdcard/jPod")
-            val newDirectory = java.io.File(JPOD_MUSIC_DIR)
-            val symlinkDirectory = java.io.File("/sdcard/Music/jPod")
-            
-            (oldDirectory.exists() && oldDirectory.isDirectory) || 
-            (newDirectory.exists() && newDirectory.isDirectory) ||
-            (symlinkDirectory.exists() && symlinkDirectory.isDirectory)
+            val musicDirectory = java.io.File(MUSIC_DIR)
+            musicDirectory.exists() && musicDirectory.isDirectory
         } catch (e: Exception) {
             false
         }
