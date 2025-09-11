@@ -304,6 +304,23 @@ let's debug this separately.  First, let's look at the emulator.  If I go into F
    - Both devices now have identical multi-artist setup: 2 artists, 3 albums, 32 songs
    - Ready for comprehensive multi-artist testing on both Pixel 8 and emulator
 
+52. **jPod Dedicated Folder Implementation** - "Should we try the jPod folder in /sdcard/Music as a way to make the filtering easier? If all of the jPod content were in that folder, we could be reasonably confident that no other content was in there. We could do this two ways: 1. have sub folders under jPod by artist (and maybe even subfolders under that by album) 2. just put all songs in /sdcard/Music/jPod, and use meta data to separate into artist and album. This seems simpler. Are there limits on how many files can exist in a folder in Android (if there were, say, 10,000 songs, would that cause a problem)?" → "OK, let's try that"
+   - Evaluated flat vs hierarchical jPod folder structure approaches  
+   - Recommended hierarchical structure (/sdcard/Music/jPod/[Artist]/) for performance and scalability
+   - Updated MusicScanner.kt to use dedicated JPOD_MUSIC_DIR = "/storage/emulated/0/Music/jPod/"
+   - Simplified filtering to just: IS_MUSIC = 1 AND DATA LIKE '/storage/emulated/0/Music/jPod/%'
+   - Removed complex exclusion rules (Merlin, Audio_Lab, .thumbnails) - no longer needed!
+   - Created jPod folder structure on both devices with artist subdirectories
+   - Moved all existing music files to new hierarchical structure:
+     * /sdcard/Music/jPod/Dave Hause/ (22 songs: 10 MP3 + 12 M4A)  
+     * /sdcard/Music/jPod/Fantastic Cat/ (10 M4A songs)
+   - Cleaned up empty original directories
+   - Applied touch to all files and cleared MediaStore cache for fresh indexing
+   - Triggered MediaStore rescan of new jPod directory structure
+   - Built and installed updated app on both devices
+   - Result: Ultra-clean filtering, future-proof for 1000+ artists, no system audio contamination
+   - Benefits: Single path filter, no exclusion rules, better performance, easier management
+
 50. **UI Improvements: Album Order & Player Controls** - "great, that works on both devices. Now, I have some UI changes: 1. When navigating into an album, from the Albums screen, I want the songs on that album shown in album order, not alphabetically 2. When playing songs from any sub-screen (Artists, Album, etc), show the player on that screen, not just on the Home screen. This is so I can play an entire album from that view, in album order, and pause, fast forward, etc without returning to the home screen"
    - Fixed album song sorting: Modified MusicPlayerViewModel.getCategorySongs() to sort by track number (.sortedBy { it.track })
    - Added player controls to all screens: Enhanced BrowseScreen and CategorySongsScreen with PlayerControls component

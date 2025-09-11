@@ -17,8 +17,8 @@ class MusicScanner(private val context: Context) {
     private val contentResolver: ContentResolver = context.contentResolver
     
     companion object {
-        // Music directory - only scan files from the standard Music folder
-        const val MUSIC_DIR = "/storage/emulated/0/Music/"
+        // jPod Music directory - dedicated folder for clean music filtering
+        const val JPOD_MUSIC_DIR = "/storage/emulated/0/Music/jPod/"
     }
     
     /**
@@ -43,12 +43,9 @@ class MusicScanner(private val context: Context) {
             "genre" // MediaStore.Audio.Genres.NAME - using string as it's not always available
         )
         
-        // Filter to show only music files from Music folder, excluding system/app directories
+        // Filter to show only music files from jPod directory - simple and clean!
         val selection = "${MediaStore.Audio.Media.IS_MUSIC} = 1 AND " +
-                "${MediaStore.Audio.Media.DATA} LIKE '$MUSIC_DIR%' AND " +
-                "${MediaStore.Audio.Media.DATA} NOT LIKE '${MUSIC_DIR}Merlin/%' AND " +
-                "${MediaStore.Audio.Media.DATA} NOT LIKE '${MUSIC_DIR}Audio_Lab/%' AND " +
-                "${MediaStore.Audio.Media.DATA} NOT LIKE '${MUSIC_DIR}.thumbnails/%'"
+                "${MediaStore.Audio.Media.DATA} LIKE '${JPOD_MUSIC_DIR}%'"
         
         val sortOrder = "${MediaStore.Audio.Media.TITLE} ASC"
         
@@ -257,12 +254,12 @@ class MusicScanner(private val context: Context) {
     }
     
     /**
-     * Check if Music directory exists
+     * Check if jPod Music directory exists
      */
-    fun isMusicDirectoryAvailable(): Boolean {
+    fun isJPodDirectoryAvailable(): Boolean {
         return try {
-            val musicDirectory = java.io.File(MUSIC_DIR)
-            musicDirectory.exists() && musicDirectory.isDirectory
+            val jPodDirectory = java.io.File(JPOD_MUSIC_DIR)
+            jPodDirectory.exists() && jPodDirectory.isDirectory
         } catch (e: Exception) {
             false
         }
@@ -273,24 +270,25 @@ class MusicScanner(private val context: Context) {
      */
     fun getRecommendedStructure(): String {
         return """
-            jPod will automatically discover all music files in your device's Music directory.
+            jPod uses a dedicated folder for clean, reliable music discovery.
             
-            Recommended structure for best organization:
+            To use jPod with your music, organize files in this structure:
             
-            /sdcard/Music/
+            /sdcard/Music/jPod/
             ├── [Artist Name]/
-            │   ├── Song1.mp3 or Song1.m4a
-            │   ├── Song2.mp3 or Song2.m4a
-            │   └── ... (more songs)
+            │   ├── 01 Song Name.mp3
+            │   ├── 02 Another Song.m4a
+            │   └── ... (more songs by this artist)
             ├── [Another Artist]/
-            │   └── [Artist songs]
-            └── [Albums will be grouped automatically by metadata]
+            │   ├── 01 Track Name.mp3
+            │   └── ... (more songs by this artist)
+            └── [More Artists]/
                     
             Supported formats: MP3, M4A/AAC, WAV, FLAC, OGG Vorbis, WMA
                     
             Use ADB to transfer music:
-            adb push /path/to/music/ /sdcard/Music/[ArtistName]/
-            adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///storage/emulated/0/Music/[ArtistName]
+            adb push /path/to/music/ /sdcard/Music/jPod/[ArtistName]/
+            adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///storage/emulated/0/Music/jPod
         """.trimIndent()
     }
 }

@@ -169,15 +169,15 @@ adb devices
 # Extract your music files locally first
 unzip your_music.zip -d ~/jPod_test_music/
 
-# Transfer to artist-specific directory in Music folder (current proven approach)
-adb push ~/jPod_test_music/"Artist Name - Album Name"/ /sdcard/Music/"Artist Name"/
+# Transfer to jPod directory with artist organization (current approach)
+adb push ~/jPod_test_music/"Artist Name - Album Name"/ /sdcard/Music/jPod/"Artist Name"/
 
 # For multiple devices (emulator + physical device):
 # Emulator:
-adb -s emulator-5554 push ~/jPod_test_music/"Artist Name - Album Name"/ /sdcard/Music/"Artist Name"/
+adb -s emulator-5554 push ~/jPod_test_music/"Artist Name - Album Name"/ /sdcard/Music/jPod/"Artist Name"/
 
 # Physical device (replace DEVICE_ID with your device ID from 'adb devices'):
-adb -s DEVICE_ID push ~/jPod_test_music/"Artist Name - Album Name"/ /sdcard/Music/"Artist Name"/
+adb -s DEVICE_ID push ~/jPod_test_music/"Artist Name - Album Name"/ /sdcard/Music/jPod/"Artist Name"/
 ```
 
 #### 3. Trigger Media Scanner
@@ -187,11 +187,11 @@ After transferring files, trigger Android's media scanner to detect them:
 adb shell pm clear com.android.providers.media
 
 # Scan artist directory  
-adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///storage/emulated/0/Music/"Artist Name"
+adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///storage/emulated/0/Music/jPod
 
 # For multiple devices:
-adb -s emulator-5554 shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///storage/emulated/0/Music/"Artist Name"
-adb -s DEVICE_ID shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///storage/emulated/0/Music/"Artist Name"
+adb -s emulator-5554 shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///storage/emulated/0/Music/jPod
+adb -s DEVICE_ID shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///storage/emulated/0/Music/jPod
 ```
 
 #### 5. Install and Test jPod
@@ -204,28 +204,35 @@ adb -s DEVICE_ID shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_
 ```
 
 ### jPod Music Directory Structure
-**jPod automatically discovers all music files** with proper metadata in your device's Music folder:
+**jPod uses a dedicated folder for clean, reliable music discovery.** Only music in the jPod folder will appear in the app:
 
 ```
-/sdcard/Music/
+/sdcard/Music/jPod/
 ├── [Artist Name]/
-│   ├── Song1.mp3, Song1.m4a, etc.
-│   ├── Song2.mp3, Song2.m4a, etc.
-│   └── ... (more songs)
+│   ├── 01 Song Name.mp3
+│   ├── 02 Another Song.m4a
+│   └── ... (more songs by this artist)
 ├── [Another Artist]/
-│   └── [Artist songs]
-└── [Albums grouped automatically by metadata]
+│   ├── 01 Track Name.mp3
+│   └── ... (more songs by this artist)
+└── [More Artists]/
 ```
+
+**Benefits of jPod Folder:**
+- ✅ **Clean Discovery**: Only your curated music appears (no system sounds, notifications, etc.)
+- ✅ **Future-Proof**: Scales to 1000+ artists without performance issues  
+- ✅ **Simple Management**: Easy to organize and transfer music collections
+- ✅ **No Interference**: Other apps can't contaminate your music library
 
 **Supported Formats:** MP3, M4A/AAC, WAV, FLAC, OGG Vorbis, WMA
 
 **Transfer and Setup (proven on multiple devices):**
 ```bash
 # Transfer music using ADB
-adb push /path/to/music/ /sdcard/Music/[ArtistName]/
+adb push /path/to/music/ /sdcard/Music/jPod/[ArtistName]/
 
 # Force MediaStore to recognize files as music
-adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///storage/emulated/0/Music/[ArtistName]
+adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///storage/emulated/0/Music/jPod
 ```
 
 **Benefits of jPod's approach:**
