@@ -171,27 +171,54 @@ adb version
 ```
 ~/jPod/
 ├── [Artist Name]/
-│   ├── song1.mp3
-│   ├── song2.m4a
-│   ├── album_track1.m4a
-│   └── album_track2.m4a
+│   ├── [Album 1]/
+│   │   ├── 01 - Track One.mp3
+│   │   ├── 02 - Track Two.mp3
+│   │   └── 03 - Track Three.m4a
+│   ├── [Album 2 - EP]/
+│   │   ├── 01 - EP Track.m4a
+│   │   └── 02 - EP Track Two.m4a
+│   └── [Singles Collection]/
+│       ├── Single Song.mp3
+│       └── Another Single.m4a
 └── [Another Artist]/
-    ├── track1.mp3
-    └── track2.m4a
+    ├── [Their Album]/
+    │   ├── track1.mp3
+    │   └── track2.m4a
+    └── [Their EP]/
+        └── ep_track.m4a
 ```
 
 **Android device target structure:**
 ```
 /sdcard/Music/jPod/
 ├── [Artist Name]/
-│   ├── song1.mp3
-│   ├── song2.m4a
-│   ├── album_track1.m4a
-│   └── album_track2.m4a
+│   ├── [Album 1]/
+│   │   ├── 01 - Track One.mp3
+│   │   ├── 02 - Track Two.mp3
+│   │   └── 03 - Track Three.m4a
+│   ├── [Album 2 - EP]/
+│   │   ├── 01 - EP Track.m4a
+│   │   └── 02 - EP Track Two.m4a
+│   └── [Singles Collection]/
+│       ├── Single Song.mp3
+│       └── Another Single.m4a
 └── [Another Artist]/
-    ├── track1.mp3
-    └── track2.m4a
+    ├── [Their Album]/
+    │   ├── track1.mp3
+    │   └── track2.m4a
+    └── [Their EP]/
+        └── ep_track.m4a
 ```
+
+#### Why Hierarchical Artist/Album Structure?
+
+The **Artist/Album** folder structure provides several important benefits:
+- **📚 Proper Album Grouping:** Albums with featured artists or collaborations appear as unified entities (no duplicate albums)
+- **🎵 Metadata Precedence:** Album metadata takes priority over individual track artists for organization
+- **📁 Clean Organization:** Music is logically organized and easy to browse by both artist and album
+- **🔍 Enhanced Discoverability:** Makes it easier to find specific albums and maintain large collections
+- **🎯 Album Cohesion:** Tracks from the same album stay together regardless of featuring different artists
 
 #### Supported Audio Formats
 - **MP3** (.mp3) - Recommended for compatibility
@@ -213,33 +240,38 @@ adb devices
 ```
 
 #### 2. Organize Music Files Locally
-Create the proper structure on your computer:
+Create the proper hierarchical structure on your computer:
 ```bash
 # Create local jPod directory (recommended location)
 mkdir -p ~/jPod
 
-# Create artist directories
-mkdir -p ~/jPod/"Dave Hause"
-mkdir -p ~/jPod/"Fantastic Cat"
+# Create artist and album directories
+mkdir -p ~/jPod/"Dave Hause"/"Kick"
+mkdir -p ~/jPod/"Dave Hause"/"Paddy - EP"  
+mkdir -p ~/jPod/"Dave Hause"/"Patty - EP"
+mkdir -p ~/jPod/"Fantastic Cat"/"The Very Best of Fantastic Cat"
 
-# Copy your music files into appropriate artist folders
-# Keep files flat within each artist folder - no album subfolders needed
+# Copy your music files into appropriate Artist/Album folders
+# Maintain the hierarchical Artist/Album structure for proper organization
 ```
 
 #### 3. Transfer Music to Device
 ```bash
-# Single device (auto-detected):
-adb push ~/jPod/"Artist Name"/ /sdcard/Music/jPod/"Artist Name"/
+# Transfer entire collection (recommended - maintains Artist/Album hierarchy):
+adb push ~/jPod/ /sdcard/Music/
 
 # Multiple devices - specify device ID:
 # Emulator:
-adb -s emulator-5554 push ~/jPod/"Artist Name"/ /sdcard/Music/jPod/"Artist Name"/
+adb -s emulator-5554 push ~/jPod/ /sdcard/Music/
 
 # Physical device (replace ABC123DEF456 with your device ID):
-adb -s ABC123DEF456 push ~/jPod/"Artist Name"/ /sdcard/Music/jPod/"Artist Name"/
+adb -s ABC123DEF456 push ~/jPod/ /sdcard/Music/
 
-# Transfer multiple artists at once:
-adb -s emulator-5554 push ~/jPod/. /sdcard/Music/jPod/
+# Transfer single artist (maintains album structure):
+adb -s emulator-5554 push ~/jPod/"Dave Hause"/ /sdcard/Music/jPod/"Dave Hause"/
+
+# Transfer single album:
+adb -s emulator-5554 push ~/jPod/"Dave Hause"/"Kick"/ /sdcard/Music/jPod/"Dave Hause"/"Kick"/
 ```
 
 #### 4. Trigger Media Scanner (Critical Step)

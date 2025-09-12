@@ -415,3 +415,53 @@ let's debug this separately.  First, let's look at the emulator.  If I go into F
    - Documented future automated music management plans (desktop app, sync tools)
    - Updated prompts.txt with detailed records of recent development sessions
    - Foundation established for future music management automation tools
+
+PROMPT 61: "when I look at the Albums screen, I see several versions of, say, "Paddy", because each song has a different artist listed. I think what we want is to give the Album in the meta data precedence over Artist for being part of an Album. So, an Album can have songs by different artists."
+
+Summary: Fixed critical album grouping logic bug where albums with featured artists or collaborations appeared as duplicate entries instead of unified albums.
+
+Key Changes:
+- MusicScanner.kt: Changed album grouping from `.groupBy { "${it.artist}|${it.album}" }` to `.groupBy { it.album }` (line 186)
+- Added smart description logic showing "Artist & others" for multi-artist albums  
+- MusicPlayerViewModel.kt: Updated getCategorySongs() to filter by album name only, not artist+album combination
+- Album metadata now takes precedence over individual track artist variations
+- Eliminated duplicate album entries for albums with featured artists/collaborations
+
+PROMPT 62: "yes, that works great! Last thing for now: Update the physical device to have the same folder structure as we have now in the emulator, and copy all the files from /users/stratej/jPod to that device, and we can test that"
+
+Summary: Successfully synchronized complete music collection from local ~/jPod/ folder to physical device with hierarchical Artist/Album structure.
+
+Actions Completed:
+- Identified physical device: 3A131FDJG000XZ (alongside emulator-5554)
+- Cleared existing /sdcard/Music/jPod/* on physical device
+- Transferred complete collection: 412 files (324 music files), 2.4GB in 69 seconds at 33.0MB/s
+- Verified Artist/Album folder structure maintained correctly on device
+- Triggered MediaStore indexing for all transferred music
+- Launched jPod app on physical device with complete music collection
+- Both devices (emulator subset + physical complete) now ready for comprehensive testing
+
+Technical Results:
+- Album grouping fix working perfectly on both devices
+- No duplicate album entries (Paddy EP, Patty EP, etc. now appear as single unified albums)
+- Complete hierarchical structure: /sdcard/Music/jPod/[Artist]/[Album]/ maintained
+- All artists and albums properly discoverable through fixed grouping logic
+
+PROMPT 63: "that works great. That it for now. Update prompts.txt"
+
+Summary: Session concluded successfully with prompts.txt updated to document the album grouping fix and physical device synchronization achievements.
+
+PROMPT 64: "oh, one last thing - we forgot to update README to reflect the new file/folder structure"
+
+Summary: Updated README.md to reflect the hierarchical Artist/Album folder structure we implemented and explain its benefits.
+
+Key Changes to README.md:
+- Updated "Required Folder Structure" section to show Artist/Album hierarchy instead of flat Artist structure
+- Changed example structure from ~/jPod/[Artist]/files to ~/jPod/[Artist]/[Album]/files
+- Updated transfer commands to properly handle the hierarchical structure
+- Added "Why Hierarchical Artist/Album Structure?" section explaining benefits:
+  * Proper album grouping (no duplicate albums from featured artists)  
+  * Album metadata precedence over individual track artists
+  * Clean organization and enhanced discoverability
+  * Album cohesion regardless of track artist variations
+- Modified step-by-step instructions to reflect Artist/Album directory creation
+- Updated ADB push commands for single artist, single album, and full collection transfers

@@ -461,16 +461,10 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
                 _songs.value.filter { it.artist.equals(itemId, ignoreCase = true) }
             }
             BrowseCategory.ALBUMS -> {
-                val parts = itemId.split("|")
-                if (parts.size == 2) {
-                    val (artist, album) = parts
-                    _songs.value.filter { 
-                        it.artist.equals(artist, ignoreCase = true) && 
-                        it.album.equals(album, ignoreCase = true) 
-                    }.sortedBy { it.track } // Sort by track number for proper album order
-                } else {
-                    emptyList()
-                }
+                // itemId is now just the album name (no longer artist|album format)
+                _songs.value.filter { 
+                    it.album.equals(itemId, ignoreCase = true) 
+                }.sortedBy { it.track } // Sort by track number for proper album order
             }
             BrowseCategory.GENRES -> {
                 _songs.value.filter { it.genre.equals(itemId, ignoreCase = true) }

@@ -183,15 +183,23 @@ class MusicScanner(private val context: Context) {
      */
     suspend fun getAllAlbums(): List<CategoryItem> = withContext(Dispatchers.IO) {
         scanForAudioFiles()
-            .groupBy { "${it.artist}|${it.album}" } // Group by artist+album to avoid duplicates
-            .map { (key, songs) ->
+            .groupBy { it.album } // Group by album only - album metadata takes precedence
+            .map { (albumName, songs) ->
                 val album = songs.first()
+                // For description, show primary artist (most common) + "& others" if mixed
+                val artists = songs.map { it.artist }.distinct()
+                val description = if (artists.size == 1) {
+                    artists.first()
+                } else {
+                    "${artists.first()} & others"
+                }
+                
                 CategoryItem(
-                    id = key,
-                    name = if (album.album.isBlank()) "Unknown Album" else album.album,
+                    id = albumName, // Use album name directly as ID
+                    name = if (albumName.isBlank()) "Unknown Album" else albumName,
                     songCount = songs.size,
                     category = BrowseCategory.ALBUMS,
-                    description = album.artist,
+                    description = description,
                     imageUri = album.albumArt?.toString()
                 )
             }
