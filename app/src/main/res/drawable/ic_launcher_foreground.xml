@@ -6,34 +6,34 @@
     
     <!-- Device outer body (black border) -->
     <path android:fillColor="#000000"
-        android:pathData="M40,25 L68,25 Q73,25 73,30 L73,78 Q73,83 68,83 L40,83 Q35,83 35,78 L35,30 Q35,25 40,25 Z"/>
+        android:pathData="M42,30 L66,30 Q70,30 70,34 L70,74 Q70,78 66,78 L42,78 Q38,78 38,74 L38,34 Q38,30 42,30 Z"/>
     
-    <!-- Device inner body (white) -->
-    <path android:fillColor="#FFFFFF"
-        android:pathData="M40,25 L68,25 Q71,25 71,28 L71,80 Q71,83 68,83 L40,83 Q37,83 37,80 L37,28 Q37,25 40,25 Z"/>
+    <!-- Device inner body (green anodized) -->
+    <path android:fillColor="#FF7CB342"
+        android:pathData="M42,30 L66,30 Q68,30 68,32 L68,76 Q68,78 66,78 L42,78 Q40,78 40,76 L40,32 Q40,30 42,30 Z"/>
     
     <!-- Screen outer (black border) -->
     <path android:fillColor="#000000"
-        android:pathData="M42,30 L66,30 Q68,30 68,32 L68,42 Q68,44 66,44 L42,44 Q40,44 40,42 L40,32 Q40,30 42,30 Z"/>
+        android:pathData="M44,34 L64,34 Q66,34 66,36 L66,44 Q66,46 64,46 L44,46 Q42,46 42,44 L42,36 Q42,34 44,34 Z"/>
     
     <!-- Screen inner (white) -->
     <path android:fillColor="#FFFFFF"
-        android:pathData="M43,31 L65,31 Q66,31 66,32 L66,42 Q66,43 65,43 L43,43 Q42,43 42,42 L42,32 Q42,31 43,31 Z"/>
+        android:pathData="M45,35 L63,35 Q64,35 64,36 L64,44 Q64,45 63,45 L45,45 Q44,45 44,44 L44,36 Q44,35 45,35 Z"/>
     
     <!-- Letter J -->
     <path android:fillColor="#000000"
-        android:pathData="M50,34 L53,34 L53,39 Q53,41 51,41 L49,41 Q47,41 47,39 L47,38 L49,38 L49,39 L51,39 L51,34 L50,34 Z"/>
+        android:pathData="M53,37 L56,37 L56,42 Q56,44 54,44 L52,44 Q50,44 50,42 L50,41 L52,41 L52,42 L54,42 L54,37 L53,37 Z"/>
     
     <!-- Control wheel outer -->
     <path android:fillColor="#000000"
-        android:pathData="M54,64m-14,0a14,14 0,1 1,28 0a14,14 0,1 1,-28 0"/>
+        android:pathData="M54,60m-12,0a12,12 0,1 1,24 0a12,12 0,1 1,-24 0"/>
     
     <!-- Control wheel inner -->
     <path android:fillColor="#FFFFFF"
-        android:pathData="M54,64m-11,0a11,11 0,1 1,22 0a11,11 0,1 1,-22 0"/>
+        android:pathData="M54,60m-9,0a9,9 0,1 1,18 0a9,9 0,1 1,-18 0"/>
     
     <!-- Center button -->
     <path android:fillColor="#000000"
-        android:pathData="M54,64m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0"/>
+        android:pathData="M54,60m-4,0a4,4 0,1 1,8 0a4,4 0,1 1,-8 0"/>
     
 </vector>
