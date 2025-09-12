@@ -156,43 +156,172 @@ adb version
 # Should show: Android Debug Bridge version X.X.X
 ```
 
-### Transferring Music Files
+### Managing Music in jPod
+
+**jPod uses a dedicated, organized folder structure for reliable music discovery and management.**
+
+#### Prerequisites
+1. **ADB installed and working** (see ADB Installation section above)
+2. **Device/emulator connected** via ADB
+3. **Music files organized locally** in the correct structure
+
+#### Required Folder Structure
+
+**Local computer reference structure:**
+```
+~/jPod/
+├── [Artist Name]/
+│   ├── song1.mp3
+│   ├── song2.m4a
+│   ├── album_track1.m4a
+│   └── album_track2.m4a
+└── [Another Artist]/
+    ├── track1.mp3
+    └── track2.m4a
+```
+
+**Android device target structure:**
+```
+/sdcard/Music/jPod/
+├── [Artist Name]/
+│   ├── song1.mp3
+│   ├── song2.m4a
+│   ├── album_track1.m4a
+│   └── album_track2.m4a
+└── [Another Artist]/
+    ├── track1.mp3
+    └── track2.m4a
+```
+
+#### Supported Audio Formats
+- **MP3** (.mp3) - Recommended for compatibility
+- **M4A/AAC** (.m4a) - Excellent quality, includes album art
+- **FLAC** (.flac) - Lossless quality
+- **WAV** (.wav) - Uncompressed
+- **OGG Vorbis** (.ogg) - Open source
+- **WMA** (.wma) - Windows Media Audio
+
+#### Step-by-Step Music Transfer Process
 
 #### 1. Check Connected Devices
 ```bash
 adb devices
 # Should show your emulator or device listed
+# Example output:
+# emulator-5554   device
+# ABC123DEF456    device  (physical device)
 ```
 
-#### 2. Transfer Your Music Files
+#### 2. Organize Music Files Locally
+Create the proper structure on your computer:
 ```bash
-# Extract your music files locally first
-unzip your_music.zip -d ~/jPod_test_music/
+# Create local jPod directory (recommended location)
+mkdir -p ~/jPod
 
-# Transfer to jPod directory with artist organization (current approach)
-adb push ~/jPod_test_music/"Artist Name - Album Name"/ /sdcard/Music/jPod/"Artist Name"/
+# Create artist directories
+mkdir -p ~/jPod/"Dave Hause"
+mkdir -p ~/jPod/"Fantastic Cat"
 
-# For multiple devices (emulator + physical device):
+# Copy your music files into appropriate artist folders
+# Keep files flat within each artist folder - no album subfolders needed
+```
+
+#### 3. Transfer Music to Device
+```bash
+# Single device (auto-detected):
+adb push ~/jPod/"Artist Name"/ /sdcard/Music/jPod/"Artist Name"/
+
+# Multiple devices - specify device ID:
 # Emulator:
-adb -s emulator-5554 push ~/jPod_test_music/"Artist Name - Album Name"/ /sdcard/Music/jPod/"Artist Name"/
+adb -s emulator-5554 push ~/jPod/"Artist Name"/ /sdcard/Music/jPod/"Artist Name"/
 
-# Physical device (replace DEVICE_ID with your device ID from 'adb devices'):
-adb -s DEVICE_ID push ~/jPod_test_music/"Artist Name - Album Name"/ /sdcard/Music/jPod/"Artist Name"/
+# Physical device (replace ABC123DEF456 with your device ID):
+adb -s ABC123DEF456 push ~/jPod/"Artist Name"/ /sdcard/Music/jPod/"Artist Name"/
+
+# Transfer multiple artists at once:
+adb -s emulator-5554 push ~/jPod/. /sdcard/Music/jPod/
 ```
 
-#### 3. Trigger Media Scanner
-After transferring files, trigger Android's media scanner to detect them:
+#### 4. Trigger Media Scanner (Critical Step)
+Android's MediaStore must be updated to index the new files:
 ```bash
-# Clear MediaStore cache for reliable indexing (recommended)
-adb shell pm clear com.android.providers.media
+# Single device:
+adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Music/jPod
 
-# Scan artist directory  
-adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///storage/emulated/0/Music/jPod
-
-# For multiple devices:
-adb -s emulator-5554 shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///storage/emulated/0/Music/jPod
-adb -s DEVICE_ID shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///storage/emulated/0/Music/jPod
+# Multiple devices:
+adb -s emulator-5554 shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Music/jPod
+adb -s ABC123DEF456 shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Music/jPod
 ```
+
+#### 5. Restart jPod App
+```bash
+# Force stop app to clear any cached music data:
+adb shell am force-stop com.example.android_music_player
+
+# Launch jPod:
+adb shell am start -n com.example.android_music_player/.MainActivity
+```
+
+#### Troubleshooting Common Issues
+
+##### "No song found" Error
+1. **Check folder structure:** Verify files are in `/sdcard/Music/jPod/[Artist]/`
+2. **Trigger media scan:** Run the MediaStore broadcast command
+3. **Check file permissions:** Files must be readable by MediaStore
+4. **Restart app:** Force-stop and restart jPod
+
+##### Duplicate Songs Appearing
+If you see duplicate versions of the same song (e.g., both MP3 and M4A):
+```bash
+# List duplicates:
+adb shell 'find /sdcard/Music/jPod -name "*Song Title*"'
+
+# Remove unwanted format (keep highest quality):
+adb shell 'rm "/sdcard/Music/jPod/Artist/Song Title.mp3"'  # Remove MP3, keep M4A
+# OR
+adb shell 'rm "/sdcard/Music/jPod/Artist/Song Title.m4a"'  # Remove M4A, keep MP3
+
+# Trigger rescan after cleanup:
+adb shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Music/jPod
+```
+
+##### Verify Transfer Success
+```bash
+# Check directory structure:
+adb shell 'find /sdcard/Music/jPod -type d | sort'
+
+# Count files per artist:
+adb shell 'ls /sdcard/Music/jPod/"Artist Name"/ | wc -l'
+
+# List specific files:
+adb shell 'ls /sdcard/Music/jPod/"Artist Name"/'
+```
+
+#### Advanced: Multiple Device Management
+For managing multiple devices simultaneously:
+```bash
+# Get all connected device IDs:
+adb devices | grep -v "List" | awk '{print $1}' > device_list.txt
+
+# Transfer to all devices (bash script):
+while read device; do
+  echo "Transferring to $device..."
+  adb -s "$device" push ~/jPod/. /sdcard/Music/jPod/
+  adb -s "$device" shell am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file:///sdcard/Music/jPod
+done < device_list.txt
+```
+
+#### Future: Automated Music Management
+*Note: This is planned for future development*
+
+The current manual ADB process will eventually be replaced with automated tools:
+- **Desktop app** for drag-and-drop music management
+- **Automated download scripts** for acquiring and organizing music
+- **Batch processing** for format conversion and metadata cleanup  
+- **Device synchronization** across multiple Android devices
+- **Music library backup** and restoration tools
+
+The foundation is in place with the standardized folder structure and reliable transfer process documented above.
 
 #### 5. Install and Test jPod
 ```bash
