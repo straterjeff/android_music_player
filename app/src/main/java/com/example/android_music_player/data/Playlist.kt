@@ -115,3 +115,20 @@ data class CategoryItem(
         return "$songCount song${if (songCount != 1) "s" else ""}"
     }
 }
+
+/**
+ * Data class representing an artist with their albums grouped together
+ */
+data class ArtistGroup(
+    val artistName: String,
+    val albums: List<CategoryItem>,
+    val totalSongs: Int,
+    var isExpanded: Boolean = false
+) {
+    /**
+     * Get display text for album and song count
+     */
+    fun getAlbumCountText(): String {
+        return "${albums.size} album${if (albums.size != 1) "s" else ""}, $totalSongs song${if (totalSongs != 1) "s" else ""}"
+    }
+}

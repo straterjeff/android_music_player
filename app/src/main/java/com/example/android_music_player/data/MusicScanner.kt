@@ -207,6 +207,56 @@ class MusicScanner(private val context: Context) {
     }
     
     /**
+     * Get albums grouped by artist for better organization
+     */
+    suspend fun getAlbumsGroupedByArtist(): List<ArtistGroup> = withContext(Dispatchers.IO) {
+        val allSongs = scanForAudioFiles()
+        
+        // First group songs by album to create album objects
+        val albums = allSongs
+            .groupBy { it.album }
+            .map { (albumName, songs) ->
+                val album = songs.first()
+                // For each album, find the primary artist (most common)
+                val artistCounts = songs.groupBy { it.artist }.mapValues { it.value.size }
+                val primaryArtist = artistCounts.maxByOrNull { it.value }?.key ?: "Unknown Artist"
+                
+                // Create album category item with primary artist as description
+                val artists = songs.map { it.artist }.distinct()
+                val description = if (artists.size == 1) {
+                    artists.first()
+                } else {
+                    "${primaryArtist} & others"
+                }
+                
+                CategoryItem(
+                    id = albumName,
+                    name = if (albumName.isBlank()) "Unknown Album" else albumName,
+                    songCount = songs.size,
+                    category = BrowseCategory.ALBUMS,
+                    description = description,
+                    imageUri = album.albumArt?.toString()
+                ) to primaryArtist
+            }
+        
+        // Now group albums by their primary artist
+        albums
+            .groupBy { it.second } // Group by primary artist
+            .map { (artistName, albumPairs) ->
+                val artistAlbums = albumPairs.map { it.first }.sortedBy { it.name }
+                val totalSongs = artistAlbums.sumOf { it.songCount }
+                
+                ArtistGroup(
+                    artistName = if (artistName.isBlank()) "Unknown Artist" else artistName,
+                    albums = artistAlbums,
+                    totalSongs = totalSongs,
+                    isExpanded = false
+                )
+            }
+            .sortedBy { it.artistName }
+    }
+    
+    /**
      * Get all unique genres
      */
     suspend fun getAllGenres(): List<CategoryItem> = withContext(Dispatchers.IO) {

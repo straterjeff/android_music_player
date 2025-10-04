@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,6 +18,7 @@ import com.example.android_music_player.data.PlaybackState
 import com.example.android_music_player.ui.components.CategoryCard
 import com.example.android_music_player.ui.components.SongListItem
 import com.example.android_music_player.ui.components.PlayerControls
+import com.example.android_music_player.ui.components.ArtistGroupCard
 import com.example.android_music_player.viewmodel.MusicPlayerViewModel
 
 /**
@@ -32,6 +33,7 @@ fun BrowseScreen(
     viewModel: MusicPlayerViewModel = viewModel()
 ) {
     val categories by viewModel.categories.collectAsState()
+    val artistGroups by viewModel.artistGroups.collectAsState()
     val playerState by viewModel.playerState.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     
@@ -132,19 +134,41 @@ fun BrowseScreen(
                 }
                 
                 else -> {
-                    // Categories list
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(vertical = 8.dp)
-                    ) {
-                        items(
-                            items = categoryItems,
-                            key = { it.id }
-                        ) { categoryItem ->
-                            CategoryCard(
-                                categoryItem = categoryItem,
-                                onClick = onCategoryItemClick
-                            )
+                    // Check if this is Albums category and we have artist groups
+                    if (category == BrowseCategory.ALBUMS && artistGroups.isNotEmpty()) {
+                        // Albums grouped by artist
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(vertical = 8.dp)
+                        ) {
+                            items(
+                                items = artistGroups,
+                                key = { artistGroup -> artistGroup.artistName }
+                            ) { artistGroup ->
+                                ArtistGroupCard(
+                                    artistGroup = artistGroup,
+                                    onArtistClick = { artistName ->
+                                        viewModel.toggleArtistGroupExpansion(artistName)
+                                    },
+                                    onAlbumClick = onCategoryItemClick
+                                )
+                            }
+                        }
+                    } else {
+                        // Regular categories list (Artists, Genres, flat Albums)
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(vertical = 8.dp)
+                        ) {
+                            items(
+                                items = categoryItems,
+                                key = { it.id }
+                            ) { categoryItem ->
+                                CategoryCard(
+                                    categoryItem = categoryItem,
+                                    onClick = onCategoryItemClick
+                                )
+                            }
                         }
                     }
                 }
@@ -291,5 +315,21 @@ private fun getCategoryDisplayName(category: BrowseCategory): String {
         BrowseCategory.RECENTLY_ADDED -> "Recently Added"
         BrowseCategory.RECENTLY_PLAYED -> "Recently Played"
         BrowseCategory.FAVORITES -> "Favorites"
+    }
+}
+
+/**
+ * Get icon for different browse categories
+ */
+private fun getCategoryIcon(category: BrowseCategory): androidx.compose.ui.graphics.vector.ImageVector {
+    return when (category) {
+        BrowseCategory.ARTISTS -> Icons.Default.Person
+        BrowseCategory.ALBUMS -> Icons.Default.Album
+        BrowseCategory.GENRES -> Icons.Default.Category
+        BrowseCategory.PLAYLISTS -> Icons.Default.QueueMusic
+        BrowseCategory.FAVORITES -> Icons.Default.Favorite
+        BrowseCategory.RECENTLY_ADDED -> Icons.Default.NewReleases
+        BrowseCategory.RECENTLY_PLAYED -> Icons.Default.History
+        else -> Icons.Default.LibraryMusic
     }
 }

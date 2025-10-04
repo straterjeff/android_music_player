@@ -9,6 +9,7 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.example.android_music_player.data.BrowseCategory
 import com.example.android_music_player.data.CategoryItem
+import com.example.android_music_player.data.ArtistGroup
 import com.example.android_music_player.data.MusicScanner
 import com.example.android_music_player.data.PlayerState
 import com.example.android_music_player.data.PlaybackState
@@ -57,6 +58,10 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
     
     private val _categories = MutableStateFlow<Map<BrowseCategory, List<CategoryItem>>>(emptyMap())
     val categories: StateFlow<Map<BrowseCategory, List<CategoryItem>>> = _categories.asStateFlow()
+    
+    // Artist-grouped albums
+    private val _artistGroups = MutableStateFlow<List<ArtistGroup>>(emptyList())
+    val artistGroups: StateFlow<List<ArtistGroup>> = _artistGroups.asStateFlow()
     
     private val _currentCategory = MutableStateFlow(BrowseCategory.ALL_SONGS)
     val currentCategory: StateFlow<BrowseCategory> = _currentCategory.asStateFlow()
@@ -132,6 +137,11 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
                     BrowseCategory.GENRES to genres,
                     BrowseCategory.ALL_SONGS to years // Using for years temporarily
                 )
+                
+                // Load artist-grouped albums
+                val artistGroups = musicScanner.getAlbumsGroupedByArtist()
+                _artistGroups.value = artistGroups
+                
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -485,6 +495,20 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
      */
     fun getSongsByYear(year: Int): List<Song> {
         return _songs.value.filter { it.year == year }
+    }
+    
+    /**
+     * Toggle expansion state of an artist group
+     */
+    fun toggleArtistGroupExpansion(artistName: String) {
+        val currentGroups = _artistGroups.value.toMutableList()
+        val groupIndex = currentGroups.indexOfFirst { it.artistName == artistName }
+        if (groupIndex != -1) {
+            currentGroups[groupIndex] = currentGroups[groupIndex].copy(
+                isExpanded = !currentGroups[groupIndex].isExpanded
+            )
+            _artistGroups.value = currentGroups
+        }
     }
     
     private fun updatePlayerState(playbackState: PlaybackState, song: Song) {
