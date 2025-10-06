@@ -243,6 +243,17 @@ fun MusicPlayerScreen(
                     // Songs list
                     val listState = rememberLazyListState()
                     
+                    // Auto-scroll to currently playing song
+                    LaunchedEffect(playerState.currentSong?.id) {
+                        playerState.currentSong?.let { currentSong ->
+                            val currentIndex = songs.indexOfFirst { it.id == currentSong.id }
+                            if (currentIndex >= 0) {
+                                // Scroll to the item, accounting for the header item (index + 1)
+                                listState.animateScrollToItem(currentIndex + 1)
+                            }
+                        }
+                    }
+                    
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxSize(),

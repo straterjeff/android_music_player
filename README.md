@@ -56,6 +56,7 @@ Browse your music collection by:
 - **Intuitive navigation** with clear visual hierarchy
 - **Responsive design** for different screen sizes
 - **Accessibility support** with proper content descriptions
+- **Auto-scroll to currently playing song** - automatically brings the playing song to the top of any song list for easy visibility and navigation
 
 ## 📱 **Screenshots & UI**
 

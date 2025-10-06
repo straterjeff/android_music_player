@@ -3,6 +3,7 @@ package com.example.android_music_player.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -269,7 +270,21 @@ fun CategorySongsScreen(
                 }
                 
                 else -> {
+                    val listState = rememberLazyListState()
+                    
+                    // Auto-scroll to currently playing song
+                    LaunchedEffect(playerState.currentSong?.id) {
+                        playerState.currentSong?.let { currentSong ->
+                            val currentIndex = songs.indexOfFirst { it.id == currentSong.id }
+                            if (currentIndex >= 0) {
+                                // Scroll to the item, accounting for the header item (index + 1)
+                                listState.animateScrollToItem(currentIndex + 1)
+                            }
+                        }
+                    }
+                    
                     LazyColumn(
+                        state = listState,
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = 16.dp)
                     ) {

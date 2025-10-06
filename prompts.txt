@@ -582,3 +582,50 @@ User reported that shuffle and repeat buttons were not working properly. Specifi
 - All functionality now works as expected
 
 Summary: Fixed shuffle and repeat functionality by correcting the repeat mode from REPEAT_MODE_ALL to REPEAT_MODE_ONE, implementing mutual exclusivity, adding proper visual feedback, and making shuffle context-aware.
+
+---
+
+**User Request: Auto-Scroll to Currently Playing Song**
+
+User requested a UI enhancement: "When a song is playing, scroll that song to the top of the list of songs, whether it is by artist, album, genre, or all songs."
+
+**Analysis and Implementation:**
+
+The goal was to automatically scroll to the currently playing song in all song lists to provide better visual context and easier navigation.
+
+**Solution Implemented:**
+
+1. **Auto-Scroll Logic** (Added to all song list screens):
+   - Used `LaunchedEffect(playerState.currentSong?.id)` to trigger when the playing song changes
+   - Found the index of the currently playing song in the current list using `songs.indexOfFirst { it.id == currentSong.id }`
+   - Used `listState.animateScrollToItem(currentIndex + 1)` for smooth animated scrolling
+   - Added +1 to account for header items in the lists (song count headers)
+
+2. **Implementation Locations:**
+   - **MusicPlayerScreen.kt**: Auto-scroll in the main "All Songs" list
+   - **BrowseScreen.kt**: Auto-scroll in CategorySongsScreen for artist/album/genre song lists
+   - **PlaylistScreen.kt**: Auto-scroll in playlist song lists
+
+3. **Technical Details:**
+   - Added `rememberLazyListState()` to all LazyColumn components that display songs
+   - Added missing imports: `androidx.compose.foundation.lazy.rememberLazyListState`
+   - Used `LaunchedEffect` (already imported via `androidx.compose.runtime.*`) for reactive scrolling
+
+**Key Features:**
+- **Context-Aware**: Works in any song list context (all songs, album, artist, genre, playlist)
+- **Smooth Animation**: Uses `animateScrollToItem()` instead of instant jumping
+- **Performance Optimized**: Only triggers when the currently playing song ID changes
+- **Header Compensation**: Accounts for list headers by adjusting the scroll index
+
+**Files Modified:**
+- `MusicPlayerScreen.kt`: Added auto-scroll to main songs list
+- `BrowseScreen.kt`: Added auto-scroll to category songs list and missing import
+- `PlaylistScreen.kt`: Added auto-scroll to playlist songs list and missing import
+
+**Result:** 
+- When a song starts playing, it automatically scrolls to the top of the current song list
+- Provides better visual context and easier navigation around the currently playing song
+- Works seamlessly across all song list contexts in the app
+- Enhances user experience with smooth, animated scrolling
+
+Summary: Successfully implemented auto-scroll functionality that brings the currently playing song to the top of any song list, improving navigation and visual context throughout the app.
