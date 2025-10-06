@@ -132,3 +132,14 @@ data class ArtistGroup(
         return "${albums.size} album${if (albums.size != 1) "s" else ""}, $totalSongs song${if (totalSongs != 1) "s" else ""}"
     }
 }
+
+/**
+ * Data class to track the current playlist context for proper shuffle/repeat behavior
+ */
+data class PlaylistContext(
+    val type: BrowseCategory,
+    val itemId: String?, // null for ALL_SONGS, otherwise artist/album/genre ID
+    val itemName: String?, // human-readable name for the context
+    val allSongs: List<Song>, // all songs in this context for shuffling
+    val originalOrder: List<Song> // original order for when shuffle is turned off
+)

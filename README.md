@@ -9,7 +9,16 @@ A feature-rich, modern Android music player built with **Kotlin** and **Jetpack 
 - **Background playback** with media session support
 - **Full playback controls**: Play, Pause, Stop, Skip Next/Previous
 - **Seek functionality** with interactive progress bar
-- **Shuffle and Repeat modes**
+- **Advanced Shuffle and Repeat modes**:
+  - **Shuffle**: Randomizes playback order within the current context
+    - When browsing all songs: shuffles all available songs
+    - When browsing an album: shuffles only songs from that album
+    - When browsing an artist: shuffles only songs from that artist
+    - Mutually exclusive with repeat mode
+  - **Repeat**: Repeats the current song continuously
+    - When enabled, the current song will restart when it reaches the end
+    - Mutually exclusive with shuffle mode
+  - Both buttons provide visual feedback when active (highlighted background)
 - **Audio focus management** and notification controls
 
 ### 📂 **Smart Music Organization**

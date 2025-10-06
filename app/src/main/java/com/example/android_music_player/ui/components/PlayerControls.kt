@@ -119,18 +119,25 @@ fun PlayerControls(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Shuffle button
-            IconButton(
+            FilledIconButton(
                 onClick = onShuffleToggle,
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier.size(48.dp),
+                colors = if (playerState.isShuffleEnabled) {
+                    IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = Color.White
+                    )
+                } else {
+                    IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             ) {
                 Icon(
                     imageVector = Icons.Default.Shuffle,
-                    contentDescription = "Shuffle",
-                    tint = if (playerState.isShuffleEnabled) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    }
+                    contentDescription = if (playerState.isShuffleEnabled) "Shuffle On" else "Shuffle Off",
+                    modifier = Modifier.size(24.dp)
                 )
             }
             
@@ -185,18 +192,25 @@ fun PlayerControls(
             }
             
             // Repeat button
-            IconButton(
+            FilledIconButton(
                 onClick = onRepeatToggle,
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier.size(48.dp),
+                colors = if (playerState.isRepeatEnabled) {
+                    IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = Color.White
+                    )
+                } else {
+                    IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             ) {
                 Icon(
                     imageVector = Icons.Default.Repeat,
-                    contentDescription = "Repeat",
-                    tint = if (playerState.isRepeatEnabled) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    }
+                    contentDescription = if (playerState.isRepeatEnabled) "Repeat On" else "Repeat Off",
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }

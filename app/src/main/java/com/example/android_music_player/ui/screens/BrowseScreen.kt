@@ -15,6 +15,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.android_music_player.data.BrowseCategory
 import com.example.android_music_player.data.CategoryItem
 import com.example.android_music_player.data.PlaybackState
+import com.example.android_music_player.data.PlaylistContext
 import com.example.android_music_player.ui.components.CategoryCard
 import com.example.android_music_player.ui.components.SongListItem
 import com.example.android_music_player.ui.components.PlayerControls
@@ -289,7 +290,14 @@ fun CategorySongsScreen(
                             SongListItem(
                                 song = song,
                                 onSongClick = { clickedSong ->
-                                    viewModel.playPlaylist(songs, songs.indexOf(clickedSong))
+                                    val context = PlaylistContext(
+                                        type = category,
+                                        itemId = itemId,
+                                        itemName = itemName,
+                                        allSongs = songs,
+                                        originalOrder = songs
+                                    )
+                                    viewModel.playPlaylist(songs, songs.indexOf(clickedSong), context)
                                 },
                                 isCurrentlyPlaying = playerState.currentSong?.id == song.id && 
                                     playerState.playbackState == PlaybackState.PLAYING

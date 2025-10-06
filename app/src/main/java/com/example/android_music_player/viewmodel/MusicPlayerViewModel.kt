@@ -1,6 +1,7 @@
 package com.example.android_music_player.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
@@ -10,6 +11,7 @@ import androidx.media3.session.SessionToken
 import com.example.android_music_player.data.BrowseCategory
 import com.example.android_music_player.data.CategoryItem
 import com.example.android_music_player.data.ArtistGroup
+import com.example.android_music_player.data.PlaylistContext
 import com.example.android_music_player.data.MusicScanner
 import com.example.android_music_player.data.PlayerState
 import com.example.android_music_player.data.PlaybackState
@@ -72,6 +74,10 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
     private val _recentlyPlayed = MutableStateFlow<List<Song>>(emptyList())
     val recentlyPlayed: StateFlow<List<Song>> = _recentlyPlayed.asStateFlow()
     
+    // Current playlist context for proper shuffle/repeat behavior
+    private val _currentPlaylistContext = MutableStateFlow<PlaylistContext?>(null)
+    val currentPlaylistContext: StateFlow<PlaylistContext?> = _currentPlaylistContext.asStateFlow()
+    
     // Player listener for state changes
     private val playerListener = object : Player.Listener {
         override fun onPlaybackStateChanged(playbackState: Int) {
@@ -87,6 +93,16 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
             mediaItem?.let {
                 updateCurrentSong(it.mediaId)
             }
+        }
+        
+        override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
+            _playerState.value = _playerState.value.copy(isShuffleEnabled = shuffleModeEnabled)
+        }
+        
+        override fun onRepeatModeChanged(repeatMode: Int) {
+            val isRepeatEnabled = repeatMode != Player.REPEAT_MODE_OFF
+            Log.d("MusicPlayerViewModel", "onRepeatModeChanged: repeatMode=$repeatMode, isRepeatEnabled=$isRepeatEnabled")
+            _playerState.value = _playerState.value.copy(isRepeatEnabled = isRepeatEnabled)
         }
     }
     
@@ -104,6 +120,14 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
         controllerFuture?.addListener({
             mediaController = controllerFuture?.get()
             mediaController?.addListener(playerListener)
+            
+            // Sync initial shuffle/repeat states from player
+            mediaController?.let { controller ->
+                _playerState.value = _playerState.value.copy(
+                    isShuffleEnabled = controller.shuffleModeEnabled,
+                    isRepeatEnabled = controller.repeatMode != Player.REPEAT_MODE_OFF
+                )
+            }
         }, MoreExecutors.directExecutor())
     }
     
@@ -235,29 +259,58 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
     /**
      * Play a list of songs starting from a specific index
      */
-    fun playPlaylist(playlist: List<Song>, startIndex: Int = 0) {
+    fun playPlaylist(playlist: List<Song>, startIndex: Int = 0, context: PlaylistContext? = null) {
         if (playlist.isNotEmpty() && startIndex in playlist.indices) {
-            val mediaItems = playlist.map { song ->
+            
+            // Store the playlist context for proper shuffle/repeat behavior
+            _currentPlaylistContext.value = context ?: PlaylistContext(
+                type = BrowseCategory.ALL_SONGS,
+                itemId = null,
+                itemName = "All Songs",
+                allSongs = playlist,
+                originalOrder = playlist
+            )
+            
+            // Apply current shuffle state to the playlist
+            val playlistToUse = if (_playerState.value.isShuffleEnabled) {
+                shufflePlaylist(playlist, startIndex)
+            } else {
+                playlist
+            }
+            
+            val actualStartIndex = if (_playerState.value.isShuffleEnabled) 0 else startIndex
+            
+            val mediaItems = playlistToUse.map { song ->
                 MediaItem.Builder()
                     .setUri(song.uri)
                     .setMediaId(song.id.toString())
                     .build()
             }
             
-            mediaController?.setMediaItems(mediaItems, startIndex, 0L)
+            mediaController?.setMediaItems(mediaItems, actualStartIndex, 0L)
             mediaController?.prepare()
             mediaController?.play()
             
-            _currentPlaylist.value = playlist
-            _currentSongIndex.value = startIndex
-            updatePlayerState(PlaybackState.PLAYING, playlist[startIndex])
+            _currentPlaylist.value = playlistToUse
+            _currentSongIndex.value = actualStartIndex
+            updatePlayerState(PlaybackState.PLAYING, playlistToUse[actualStartIndex])
             
             // Track recently played
             viewModelScope.launch {
-                playlistManager.addToRecentlyPlayed(playlist[startIndex].id)
+                playlistManager.addToRecentlyPlayed(playlistToUse[actualStartIndex].id)
                 loadRecentlyPlayed()
             }
         }
+    }
+    
+    /**
+     * Create a shuffled playlist with the current song moved to the front
+     */
+    private fun shufflePlaylist(songs: List<Song>, currentIndex: Int): List<Song> {
+        val mutableSongs = songs.toMutableList()
+        val currentSong = mutableSongs.removeAt(currentIndex)
+        mutableSongs.shuffle()
+        return listOf(currentSong) + mutableSongs
     }
     
     /**
@@ -317,18 +370,112 @@ class MusicPlayerViewModel(application: Application) : AndroidViewModel(applicat
     }
     
     /**
-     * Set shuffle mode
+     * Set shuffle mode - mutually exclusive with repeat
      */
     fun setShuffleEnabled(enabled: Boolean) {
-        mediaController?.shuffleModeEnabled = enabled
+        if (enabled) {
+            // Turn off repeat when enabling shuffle (mutually exclusive)
+            setRepeatEnabled(false)
+        }
+        
+        val currentContext = _currentPlaylistContext.value
+        val currentPlaylist = _currentPlaylist.value
+        val currentSong = _playerState.value.currentSong
+        
+        if (currentContext != null && currentPlaylist.isNotEmpty() && currentSong != null) {
+            val newPlaylist = if (enabled) {
+                // Shuffle: get all songs from context and shuffle them
+                val allSongs = currentContext.allSongs
+                val currentIndex = allSongs.indexOfFirst { it.id == currentSong.id }
+                if (currentIndex >= 0) {
+                    shufflePlaylist(allSongs, currentIndex)
+                } else {
+                    allSongs.shuffled()
+                }
+            } else {
+                // Un-shuffle: restore original order from context
+                currentContext.originalOrder
+            }
+            
+            // Update the playlist in the player
+            val currentSongIndex = newPlaylist.indexOfFirst { it.id == currentSong.id }
+            if (currentSongIndex >= 0) {
+                val mediaItems = newPlaylist.map { song ->
+                    MediaItem.Builder()
+                        .setUri(song.uri)
+                        .setMediaId(song.id.toString())
+                        .build()
+                }
+                
+                // Get current position to maintain playback
+                val currentPosition = mediaController?.currentPosition ?: 0L
+                
+                mediaController?.let { controller ->
+                    controller.setMediaItems(mediaItems, currentSongIndex, currentPosition)
+                    controller.shuffleModeEnabled = enabled
+                    controller.prepare()
+                    if (_playerState.value.playbackState == PlaybackState.PLAYING) {
+                        controller.play()
+                    }
+                }
+                
+                _currentPlaylist.value = newPlaylist
+                _currentSongIndex.value = currentSongIndex
+            }
+        } else {
+            // Fallback: just set the shuffle mode on the player
+            mediaController?.shuffleModeEnabled = enabled
+        }
+        
         _playerState.value = _playerState.value.copy(isShuffleEnabled = enabled)
     }
     
     /**
-     * Set repeat mode
+     * Set repeat mode - mutually exclusive with shuffle
      */
     fun setRepeatEnabled(enabled: Boolean) {
-        val repeatMode = if (enabled) Player.REPEAT_MODE_ALL else Player.REPEAT_MODE_OFF
+        // Store the current shuffle state before turning it off
+        val wasShuffleEnabled = _playerState.value.isShuffleEnabled
+        
+        if (enabled) {
+            // Turn off shuffle when enabling repeat (mutually exclusive)
+            mediaController?.shuffleModeEnabled = false
+            _playerState.value = _playerState.value.copy(isShuffleEnabled = false)
+            
+            // If shuffle was on, restore original order
+            val currentContext = _currentPlaylistContext.value
+            val currentSong = _playerState.value.currentSong
+            if (currentContext != null && currentSong != null && wasShuffleEnabled) {
+                val originalPlaylist = currentContext.originalOrder
+                val currentSongIndex = originalPlaylist.indexOfFirst { it.id == currentSong.id }
+                
+                if (currentSongIndex >= 0) {
+                    val mediaItems = originalPlaylist.map { song ->
+                        MediaItem.Builder()
+                            .setUri(song.uri)
+                            .setMediaId(song.id.toString())
+                            .build()
+                    }
+                    
+                    val currentPosition = mediaController?.currentPosition ?: 0L
+                    
+                    mediaController?.let { controller ->
+                        controller.setMediaItems(mediaItems, currentSongIndex, currentPosition)
+                        controller.prepare()
+                        if (_playerState.value.playbackState == PlaybackState.PLAYING) {
+                            controller.play()
+                        }
+                    }
+                    
+                    _currentPlaylist.value = originalPlaylist
+                    _currentSongIndex.value = currentSongIndex
+                }
+            }
+        }
+        
+        // Set repeat mode: REPEAT_MODE_ONE repeats the current song
+        val repeatMode = if (enabled) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
+        Log.d("MusicPlayerViewModel", "setRepeatEnabled: enabled=$enabled, setting repeatMode=$repeatMode")
         mediaController?.repeatMode = repeatMode
         _playerState.value = _playerState.value.copy(isRepeatEnabled = enabled)
     }

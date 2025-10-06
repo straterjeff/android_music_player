@@ -14,8 +14,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.android_music_player.data.BrowseCategory
 import com.example.android_music_player.data.PlaybackState
 import com.example.android_music_player.data.Playlist
+import com.example.android_music_player.data.PlaylistContext
 import com.example.android_music_player.ui.components.SongListItem
 import com.example.android_music_player.viewmodel.MusicPlayerViewModel
 
@@ -418,7 +420,14 @@ fun PlaylistSongsScreen(
                             SongListItem(
                                 song = song,
                                 onSongClick = { clickedSong ->
-                                    viewModel.playPlaylist(songs, songs.indexOf(clickedSong))
+                                    val context = PlaylistContext(
+                                        type = BrowseCategory.PLAYLISTS,
+                                        itemId = playlist.id,
+                                        itemName = playlist.name,
+                                        allSongs = songs,
+                                        originalOrder = songs
+                                    )
+                                    viewModel.playPlaylist(songs, songs.indexOf(clickedSong), context)
                                 },
                                 isCurrentlyPlaying = playerState.currentSong?.id == song.id && 
                                     playerState.playbackState == PlaybackState.PLAYING
