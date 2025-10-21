@@ -257,7 +257,7 @@ fun MusicPlayerScreen(
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = 16.dp)
+                        contentPadding = PaddingValues(bottom = 80.dp)
                     ) {
                         item {
                             // Songs count header

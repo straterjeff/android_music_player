@@ -141,7 +141,7 @@ fun BrowseScreen(
                         // Albums grouped by artist
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(vertical = 8.dp)
+                            contentPadding = PaddingValues(top = 8.dp, bottom = 80.dp)
                         ) {
                             items(
                                 items = artistGroups,
@@ -160,7 +160,7 @@ fun BrowseScreen(
                         // Regular categories list (Artists, Genres, flat Albums)
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(vertical = 8.dp)
+                            contentPadding = PaddingValues(top = 8.dp, bottom = 80.dp)
                         ) {
                             items(
                                 items = categoryItems,
@@ -286,7 +286,7 @@ fun CategorySongsScreen(
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = 16.dp)
+                        contentPadding = PaddingValues(bottom = 80.dp)
                     ) {
                         item {
                             // Header with song count
